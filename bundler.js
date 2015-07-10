@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var spawn = require('child_process').spawn;
+var path = require('path');
 
 
 var program = require('commander');
@@ -12,6 +13,10 @@ var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
 var CMUS_DIR = HOME_DIR + '/.cmus';
 var THEMES_DIR = CMUS_DIR + '/themes';
 var PLUGINS_DIR = CMUS_DIR + '/plugins';
+var DIRS = {
+  'plugin': PLUGINS_DIR,
+  'theme': THEMES_DIR,
+};
 
 
 function dump(message){
@@ -39,13 +44,33 @@ function echo_cmus(message){
   run_cmd( "cmus-remote", ["-C", "echo " + message], function(text) { dump("got from cmus: " + text) });
 }
 
-function clone_repo(link, dest, cbk){
-  dump(link + '  ' + dest + '/' + link.split('/')[1]);
-  github_downloader(link, dest + '/' + link.split('/')[1], function(){
+function clone_repo(link, target_dir, cbk){
+  dump(link + ' -> ' + target_dir);
+  github_downloader(link, target_dir, function(){
     dump(link + ' installed');
     cbk && cbk();
   });
 }
+
+function install_plugin(type, link){
+  var parts = link.split('#');
+  var target_dir = 
+    DIRS[type] +
+    "/" +
+    parts[0].split('/')[1];
+
+  fs.exists(target_dir, function(exists) {
+    if(!exists){
+      dump(type + ': ' + program.plugin + ' ');
+      clone_repo(link, target_dir, function(){ 
+        echo_cmus(type + ' ' + link + ' installed');
+      });
+    } else {
+      dump(type + ': ' + link + ' already installed');
+    }
+  });
+}
+
 
 program
   .version('0.0.1')
@@ -60,15 +85,10 @@ if(program.startup){
   echo_cmus('startup!!!');
 }
 else if(program.theme){
-  clone_repo(program.theme, THEMES_DIR, function(){ 
-    echo_cmus('theme ' + program.theme + ' installed');
-  });
+  install_plugin('theme', program.theme);
 }
 else if(program.plugin){
-  dump('plug: ' + program.plugin + ' ');
-  clone_repo(program.plugin, PLUGINS_DIR, function(){ 
-    echo_cmus('plugin ' + program.plugin + ' installed');
-  });
+  install_plugin('plugin', program.plugin);
 }
 else {
   dump('just agruments \n-----' + JSON.stringify(program.args, null, 4) + '\n-------');
