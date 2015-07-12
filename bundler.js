@@ -17,19 +17,34 @@ var DIRS = {
   'plugin': PLUGINS_DIR,
   'theme': THEMES_DIR,
 };
+var status_programs = CMUS_DIR + '/status_display_programs.json';
 
+
+function write_file(file, str, cbk){
+  fs.writeFileSync(file, str);
+  cbk && cbk();
+}
+
+function write_json(file, obj, cbk){
+  write_file(file, JSON.stringify(obj), cbk);
+}
+
+function read_file(filename){
+  return fs.readFileSync(filename, {'encoding': 'utf8'});
+}
+
+function read_json(filename){
+  return JSON.parse(read_file(filename));
+}
 
 function dump(message){
-  fs.writeFile(
-    CMUS_DIR + "/bundler.log", 
+  write_file(
+    CMUS_DIR + "/bundler.log",
     message + '\n\n', 
-    function(err) {
-      if(err) {
-          return console.log(err);
-      }
+    function() {
       console.log("[LOG]: " + message);
     }
-  ); 
+  );
 }
 
 function run_cmd(cmd, args, callBack ) {
@@ -59,14 +74,18 @@ function install_plugin(type, link){
     "/" +
     parts[0].split('/')[1];
 
+  if(fs.existsSync(target_dir)){
+    dump(type + ': ' + link + ' already installed');
+  } else {
+    dump(type + ': ' + program.plugin + ' ');
+    clone_repo(link, target_dir, function(){
+      echo_cmus(type + ' ' + link + ' installed');
+    });
+  }
+
   fs.exists(target_dir, function(exists) {
     if(!exists){
-      dump(type + ': ' + program.plugin + ' ');
-      clone_repo(link, target_dir, function(){ 
-        echo_cmus(type + ' ' + link + ' installed');
-      });
     } else {
-      dump(type + ': ' + link + ' already installed');
     }
   });
 }
@@ -77,11 +96,12 @@ program
   .option('startup', 'startup program')
   .option('theme [value]', 'theme')
   .option('plugin [value]', 'plugin')
-  .option('status_program [value]', 'status program')
+  .option('status_program', 'status program')
   .parse(process.argv);
 
 
 if(program.startup){
+  write_file(status_programs, '[]');
   echo_cmus('startup!!!');
 }
 else if(program.theme){
@@ -90,7 +110,12 @@ else if(program.theme){
 else if(program.plugin){
   install_plugin('plugin', program.plugin);
 }
+else if(program.status_program){
+  var programs = program.args;
+  write_json(status_programs, programs);
+  dump('status_program: ' + programs + ' appended');
+}
 else {
-  dump('just agruments \n-----' + JSON.stringify(program.args, null, 4) + '\n-------');
+  dump('just agruments \n-----\n' + JSON.stringify(program.args, null, 4) + '\n-------');
 }
 
