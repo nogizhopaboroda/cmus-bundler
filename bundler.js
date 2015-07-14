@@ -82,12 +82,6 @@ function install_plugin(type, link){
       echo_cmus(type + ' ' + link + ' installed');
     });
   }
-
-  fs.exists(target_dir, function(exists) {
-    if(!exists){
-    } else {
-    }
-  });
 }
 
 
@@ -96,7 +90,8 @@ program
   .option('startup', 'startup program')
   .option('theme [value]', 'theme')
   .option('plugin [value]', 'plugin')
-  .option('status_program', 'status program')
+  .option('status_program', 'set status program')
+  .option('status', 'send current status to status programs')
   .parse(process.argv);
 
 
@@ -114,6 +109,17 @@ else if(program.status_program){
   var programs = program.args;
   write_json(status_programs, programs);
   dump('status_program: ' + programs + ' appended');
+}
+else if(program.status){
+  read_json(status_programs).forEach(function(status_program){
+    //run_cmd( "bash", [PLUGINS_DIR + '/' + status_program].concat('status').concat(program.args), function(text) { 
+      //dump("got from status program: " + text);
+    //});
+    var execFile = require('child_process').execFile;
+    execFile(PLUGINS_DIR + '/' + status_program, ['status'].concat(program.args), function(error, stdout, stderr) {
+      dump("got from status program: " + stdout);
+    });
+  })
 }
 else {
   dump('just agruments \n-----\n' + JSON.stringify(program.args, null, 4) + '\n-------');
