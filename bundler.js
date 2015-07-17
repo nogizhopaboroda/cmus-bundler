@@ -6,7 +6,6 @@ var path = require('path');
 
 
 var program = require('commander');
-var github_downloader = require('download-github-repo');
 
 
 var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
@@ -61,7 +60,7 @@ function echo_cmus(message){
 
 function clone_repo(link, target_dir, cbk){
   dump(link + ' -> ' + target_dir);
-  github_downloader(link, target_dir, function(){
+  run_cmd("git", ["clone", "git@github.com:" + link + ".git", target_dir], function(){
     dump(link + ' installed');
     cbk && cbk();
   });
