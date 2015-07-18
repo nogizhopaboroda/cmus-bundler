@@ -1,0 +1,25 @@
+{
+  "name": "cmus-bundler",
+  "version": "0.0.1",
+  "description": "cmus player plugin manager",
+  "main": "bundler.js",
+  "dependencies": {
+    "commander": "^2.8.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/nogizhopaboroda/cmus-bundler.git"
+  },
+  "keywords": [
+    "cmus", "plugin manager", "music"
+  ],
+  "author": "Alexander Zhukov",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/nogizhopaboroda/cmus-bundler/issues"
+  },
+  "homepage": "https://github.com/nogizhopaboroda/cmus-bundler#readme"
+}
