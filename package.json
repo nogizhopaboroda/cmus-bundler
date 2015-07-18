@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "cmus player plugin manager",
   "main": "bundler.js",
+  "bin": {
+    "cmus-bundler": "./bundler.js"
+  },
+  "preferGlobal": "true",
   "dependencies": {
     "commander": "^2.8.1"
   },
