@@ -111,9 +111,6 @@ else if(program.status_program){
 }
 else if(program.status){
   read_json(status_programs).forEach(function(status_program){
-    //run_cmd( "bash", [PLUGINS_DIR + '/' + status_program].concat('status').concat(program.args), function(text) { 
-      //dump("got from status program: " + text);
-    //});
     var execFile = require('child_process').execFile;
     execFile(PLUGINS_DIR + '/' + status_program, ['status'].concat(program.args), function(error, stdout, stderr) {
       dump("got from status program: " + stdout);
