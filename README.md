@@ -63,3 +63,8 @@ shell cmus-bundler plugin nogizhopaboroda/cmus-cover-art
 shell cmus-bundler status_program cmus-cover-art/observe.sh
 set status_display_program=cmus-bundler
 ```
+
+Bugs/Issues
+-----------
+
+Please report [here](https://github.com/nogizhopaboroda/cmus-bundler/issues)
