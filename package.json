@@ -7,7 +7,10 @@
     "cmus-bundler": "./bundler.js"
   },
   "preferGlobal": "true",
-  "dependencies": {},
+  "dependencies": {
+    "dnode": "^1.2.1",
+    "ps-node": "0.0.4"
+  },
   "devDependencies": {
     "dnode": "^1.2.1",
     "ps-node": "0.0.4"

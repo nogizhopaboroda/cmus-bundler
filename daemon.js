@@ -15,7 +15,8 @@ var DIRS = {
 
 var state = {
   "variables": {},
-  "status_programs": []
+  "status_programs": [],
+  "queue": []
 };
 
   
@@ -29,6 +30,7 @@ cmus_remote.stdout.on('data', function (data) {
 
 cmus_remote.stderr.on('data', function (data) {
   console.log('stderr: ' + data);
+  console.log('graceful death');
   process.exit(0);
 });
 
@@ -44,6 +46,8 @@ setInterval(function(){
 console.log('\ndaemon started');
 
 function on_message(message, cb){
+
+    state.queue.push(message.join(' '));
 
     switch(message[0]){
       case "set":
@@ -69,16 +73,20 @@ function on_message(message, cb){
         console.log('got status: ', message);
 
         state.status_programs.forEach(function(status_program){
-          var execFile = require('child_process').execFile;
-          execFile(PLUGINS_DIR + '/' + status_program, message, function(error, stdout, stderr) {
-            console.log("got from status program: " + stdout);
-          });
-        })
+          var execFile = require('child_process').execFileSync;
+          try {
+            var result = execFile(PLUGINS_DIR + '/' + status_program, message);
+            console.log("got from status program: " + result);
+          } catch (e) {
+            console.log('status program threw ', e); 
+          }
+          console.log('executing: ', status_program);
+        });
       
+        cb('ok');
         break;
       default:
         console.log('unrecognised command: ', message.join(' '));
-        queue.push(message.join(' '));
         cb('ok');
     }
 }
