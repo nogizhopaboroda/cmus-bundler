@@ -2,6 +2,7 @@ var dnode = require('dnode');
 var spawn = require('child_process').spawn;
 var fs = require('fs');
 
+var logger = require('./logger')();
 
 
 var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
@@ -24,17 +25,17 @@ var state = {
 var cmus_remote = spawn('cmus-remote', []);
 
 cmus_remote.stdout.on('data', function (data) {
-  console.log('stdout: ' + data);
+  logger('stdout: ' + data, 'stdout');
 });
 
 cmus_remote.stderr.on('data', function (data) {
-  console.log('stderr: ' + data);
-  console.log('graceful death');
+  logger('stderr: ' + data, 'warning');
+  logger('graceful death', 'info');
   process.exit(0);
 });
 
 cmus_remote.on('close', function (code) {
-  console.log('child process exited with code ' + code);
+  logger('child process exited with code ' + code, 'info');
   process.exit(0);
 });
 
@@ -42,7 +43,7 @@ setInterval(function(){
   cmus_remote.stdin.write('\n');
 }, 1000);
 
-console.log('\ndaemon started');
+logger('daemon started', 'info');
 
 function on_message(message, cb){
 
@@ -50,7 +51,7 @@ function on_message(message, cb){
 
     switch(message[0]){
       case "set":
-        console.log('setting variable %s: %s', message[1], message[2]);
+        logger('setting variable ' + message[1] + ': ' + message[2], message[0]);
         state.variables[message[1]] = message[2];
         cb('ok');
         break;
@@ -59,25 +60,25 @@ function on_message(message, cb){
         break;
       case "plugin":
       case "theme":
-        console.log('installing %s: %s', message[0], message[1]);
+        logger('installing ' + message[0] + ': ' + message[1], message[0]);
         install_plugin(message[0], message[1]);
         cb('ok');
         break;
       case "status_program":
-        console.log('setting status program: %s, arguments: ', message[1], message.slice(2));
+        logger('setting status program: ' + message[1] + ', arguments: ' + message.slice(2), message[0]);
         state.status_programs.push(message[1]);
         cb('ok');
         break;
       case "status":
-        console.log('got status: ', message);
+        logger('got status: ' + message.join(' '), message[0]);
 
         state.status_programs.forEach(function(status_program){
           var execFile = require('child_process').execFile;
           execFile(PLUGINS_DIR + '/' + status_program, message, {env: state.variables}, function(error, stdout, stderr){
             if (error !== null) {
-              console.log('status program %s failed. error:\n%s\n', status_program, error.stack);
+              logger('status program ' + status_program + ' failed. error:\n' + error.stack + '\n', 'plugin');
             } else {
-              console.log("got from status program %s: ", status_program, stdout);
+              logger('got from status program ' + status_program + ': ' + stdout, 'plugin');
             }
           });
         });
@@ -85,7 +86,7 @@ function on_message(message, cb){
         cb('ok');
         break;
       default:
-        console.log('unknown command: ', message.join(' '));
+        logger('unknown command: ' + message.join(' '), 'unknown');
         cb('ok');
     }
 }
@@ -114,7 +115,7 @@ function install_plugin(type, link){
     parts[0].split('/')[1];
 
   if(fs.existsSync(target_dir)){
-    console.log(type + ': ' + link + ' already installed');
+    logger(type + ': ' + link + ' already installed', type);
   } else {
     console.log(type + ': ' + parts[0] + ' ');
     clone_repo(link, target_dir, function(){

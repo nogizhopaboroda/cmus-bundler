@@ -33,7 +33,7 @@ if(process.argv[2] === 'start'){
         if(resultList.length > 0){
           send_message(process.argv.slice(2));
         } else {
-          console.log('daemon is not running');
+          console.error('daemon is not running');
         }
       });
     }
