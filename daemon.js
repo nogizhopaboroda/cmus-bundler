@@ -2,7 +2,7 @@ var dnode = require('dnode');
 var spawn = require('child_process').spawn;
 var fs = require('fs');
 
-var logger = require('./logger')();
+var logger = require('./logger')(process.argv[3] === 'debug' ? process.argv.slice(4) : ['info']);
 
 
 var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
@@ -100,9 +100,8 @@ function run_cmd(cmd, args, callBack ) {
 }
 
 function clone_repo(link, target_dir, cbk){
-  console.log(link + ' -> ' + target_dir);
+  logger(link + ' -> ' + target_dir, 'plugin');
   run_cmd("git", ["clone", "git@github.com:" + link + ".git", target_dir], function(){
-    console.log(link + ' installed');
     cbk && cbk();
   });
 }
@@ -117,8 +116,8 @@ function install_plugin(type, link){
   if(fs.existsSync(target_dir)){
     logger(type + ': ' + link + ' already installed', type);
   } else {
-    console.log(type + ': ' + parts[0] + ' ');
     clone_repo(link, target_dir, function(){
+      logger(link + ' installed', 'plugin');
       cmus_remote.stdin.write('echo ' + type + ' ' + link + ' installed\n');
     });
   }
