@@ -1,123 +1,35 @@
 #!/usr/bin/env node
 
-var fs = require('fs');
-var spawn = require('child_process').spawn;
-var path = require('path');
+var ps = require('ps-node');
+var dnode = require('dnode');
+var package_info = require('./package.json');
 
 
-var program = require('commander');
-
-
-var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
-var CMUS_DIR = HOME_DIR + '/.cmus';
-var THEMES_DIR = CMUS_DIR + '/themes';
-var PLUGINS_DIR = CMUS_DIR + '/plugins';
-var DIRS = {
-  'plugin': PLUGINS_DIR,
-  'theme': THEMES_DIR,
-};
-var status_programs = CMUS_DIR + '/status_display_programs.json';
-
-
-function write_file(file, str, cbk){
-  fs.writeFileSync(file, str);
-  cbk && cbk();
+if(process.argv[2] === 'start'){
+  require('./daemon');
+} else if(process.argv[2] === '-v' || process.argv[2] === 'version'){
+  console.log(package_info.version);
+} else if(process.argv[2] === '-h' || process.argv[2] === 'help'){
+  console.log('help!!!');
+} else {
+    ps.lookup({
+      command: 'node',
+      arguments: 'start', //must be more arguments here
+    }, function(err, resultList ) {
+      if (err) {
+        throw new Error( err );
+      }
+      send_message(process.argv.slice(2));
+    });
 }
 
-function write_json(file, obj, cbk){
-  write_file(file, JSON.stringify(obj), cbk);
-}
 
-function read_file(filename){
-  return fs.readFileSync(filename, {'encoding': 'utf8'});
-}
-
-function read_json(filename){
-  return JSON.parse(read_file(filename));
-}
-
-function dump(message){
-  write_file(
-    CMUS_DIR + "/bundler.log",
-    message + '\n\n', 
-    function() {
-      console.log("[LOG]: " + message);
-    }
-  );
-}
-
-function run_cmd(cmd, args, callBack ) {
-    var child = spawn(cmd, args);
-    var resp = "";
- 
-    child.stdout.on('data', function (buffer) { resp += buffer.toString() });
-    child.stdout.on('end', function() { callBack (resp) });
-}
-
-function echo_cmus(message){
-  run_cmd( "cmus-remote", ["-C", "echo " + message], function(text) { dump("got from cmus: " + text) });
-}
-
-function clone_repo(link, target_dir, cbk){
-  dump(link + ' -> ' + target_dir);
-  run_cmd("git", ["clone", "git@github.com:" + link + ".git", target_dir], function(){
-    dump(link + ' installed');
-    cbk && cbk();
+function send_message(message){
+  var client = dnode.connect(5004);
+  client.on('remote', function (remote) {
+    remote.message(message, function (response) {
+      console.log(response);
+      client.end();
+    });
   });
 }
-
-function install_plugin(type, link){
-  var parts = link.split('#');
-  var target_dir = 
-    DIRS[type] +
-    "/" +
-    parts[0].split('/')[1];
-
-  if(fs.existsSync(target_dir)){
-    dump(type + ': ' + link + ' already installed');
-  } else {
-    dump(type + ': ' + program.plugin + ' ');
-    clone_repo(link, target_dir, function(){
-      echo_cmus(type + ' ' + link + ' installed');
-    });
-  }
-}
-
-
-program
-  .version('0.0.1')
-  .option('startup', 'startup program')
-  .option('theme [value]', 'theme')
-  .option('plugin [value]', 'plugin')
-  .option('status_program', 'set status program')
-  .option('status', 'send current status to status programs')
-  .parse(process.argv);
-
-
-if(program.startup){
-  write_file(status_programs, '[]');
-  echo_cmus('startup!!!');
-}
-else if(program.theme){
-  install_plugin('theme', program.theme);
-}
-else if(program.plugin){
-  install_plugin('plugin', program.plugin);
-}
-else if(program.status_program){
-  var programs = program.args;
-  write_json(status_programs, programs);
-  dump('status_program: ' + programs + ' appended');
-}
-else if(program.status){
-  read_json(status_programs).forEach(function(status_program){
-    var execFile = require('child_process').execFile;
-    execFile(PLUGINS_DIR + '/' + status_program, ['status'].concat(program.args), function(error, stdout, stderr) {
-      dump("got from status program: " + stdout);
-    });
-  })
-}
-else {
-  dump('just agruments \n-----\n' + JSON.stringify(program.args, null, 4) + '\n-------');
-}
-
