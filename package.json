@@ -8,8 +8,7 @@
   },
   "preferGlobal": "true",
   "dependencies": {
-    "dnode": "^1.2.1",
-    "ps-node": "0.0.4"
+    "dnode": "^1.2.1"
   },
   "devDependencies": {
     "dnode": "^1.2.1",

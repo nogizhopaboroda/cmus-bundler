@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var ps = require('ps-node');
 var dnode = require('dnode');
 var package_info = require('./package.json');
 var exec_async = require('child_process').exec;
@@ -23,17 +22,11 @@ if(process.argv[2] === 'start'){
     });
 
     function lookup(bundler_path){
-      ps.lookup({
-        command: 'node',
-        arguments: [bundler_path, 'start'],
-      }, function(err, resultList ) {
-        if (err) {
-          throw new Error( err );
-        }
-        if(resultList.length > 0){
-          send_message(process.argv.slice(2));
-        } else {
+      exec_async('pgrep -f "node ' + bundler_path + ' start"', function(error, stdout, stderr){
+        if (error !== null) {
           console.error('daemon is not running');
+        } else {
+          send_message(process.argv.slice(2));
         }
       });
     }
