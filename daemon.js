@@ -3,6 +3,7 @@ var spawn = require('child_process').spawn;
 var fs = require('fs');
 
 
+
 var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
 var CMUS_DIR = HOME_DIR + '/.cmus';
 var THEMES_DIR = CMUS_DIR + '/themes';
@@ -21,8 +22,6 @@ var state = {
 
   
 var cmus_remote = spawn('cmus-remote', []);
-
-var queue = [];
 
 cmus_remote.stdout.on('data', function (data) {
   console.log('stdout: ' + data);
@@ -76,7 +75,7 @@ function on_message(message, cb){
           var execFile = require('child_process').execFile;
           execFile(PLUGINS_DIR + '/' + status_program, message, {env: state.variables}, function(error, stdout, stderr){
             if (error !== null) {
-              console.log('status program %s failed ', status_program, error); 
+              console.log('status program %s failed. error:\n%s\n', status_program, error.stack);
             } else {
               console.log("got from status program %s: ", status_program, stdout);
             }
