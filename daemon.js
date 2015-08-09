@@ -74,7 +74,7 @@ function on_message(message, cb){
 
         state.status_programs.forEach(function(status_program){
           var execFile = require('child_process').execFile;
-          execFile(PLUGINS_DIR + '/' + status_program, message, function(error, stdout, stderr){
+          execFile(PLUGINS_DIR + '/' + status_program, message, {env: state.variables}, function(error, stdout, stderr){
             if (error !== null) {
               console.log('status program %s failed ', status_program, error); 
             } else {
@@ -86,7 +86,7 @@ function on_message(message, cb){
         cb('ok');
         break;
       default:
-        console.log('unrecognised command: ', message.join(' '));
+        console.log('unknown command: ', message.join(' '));
         cb('ok');
     }
 }
