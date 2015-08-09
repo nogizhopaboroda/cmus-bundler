@@ -73,14 +73,14 @@ function on_message(message, cb){
         console.log('got status: ', message);
 
         state.status_programs.forEach(function(status_program){
-          var execFile = require('child_process').execFileSync;
-          try {
-            var result = execFile(PLUGINS_DIR + '/' + status_program, message);
-            console.log("got from status program: " + result);
-          } catch (e) {
-            console.log('status program threw ', e); 
-          }
-          console.log('executing: ', status_program);
+          var execFile = require('child_process').execFile;
+          execFile(PLUGINS_DIR + '/' + status_program, message, function(error, stdout, stderr){
+            if (error !== null) {
+              console.log('status program %s failed ', status_program, error); 
+            } else {
+              console.log("got from status program %s: ", status_program, stdout);
+            }
+          });
         });
       
         cb('ok');
