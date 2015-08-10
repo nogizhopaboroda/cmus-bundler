@@ -1,6 +1,8 @@
 var dnode = require('dnode');
 var spawn = require('child_process').spawn;
 var fs = require('fs');
+var exec_async = require('child_process').exec;
+var execFile = require('child_process').execFile;
 
 var logger = require('./logger')(process.argv[3] === 'debug' ? process.argv.slice(4) : ['info']);
 
@@ -13,7 +15,7 @@ var DIRS = {
   'theme': THEMES_DIR,
 };
 
-
+var children = [];
 var state = {
   "variables": {},
   "status_programs": [],
@@ -30,6 +32,9 @@ cmus_remote.stdout.on('data', function (data) {
 cmus_remote.stderr.on('data', function (data) {
   logger('stderr: ' + data, 'warning');
   logger('graceful death', 'info');
+  children.forEach(function(child){
+    child.kill();
+  });
   process.exit(0);
 });
 
@@ -58,22 +63,27 @@ function on_message(message, cb){
         cb(state);
         break;
       case "call":
-        console.log(message.slice(2));
         var script_name = '';
         if(message[1] === 'cmd'){
-          script_name = __dirname + "/cmd_proxy.sh";
+          var child_process = exec_async(message.slice(2).join(' '), function(error, stdout, stderr){
+            if (error !== null) {
+              logger('program failed: ' + error.stack, 'call');
+            } else {
+              logger('got from program: ' + stdout, 'call');
+            }
+          });
         } else {
           script_name = PLUGINS_DIR + '/' + message[1];
+          var child_process = execFile(script_name, message.slice(2), {cwd: PLUGINS_DIR}, function(error, stdout, stderr){
+            if (error !== null) {
+              logger('program ' + script_name + ' failed. error:\n' + error.stack + '\n', message[0]);
+            } else {
+              logger('got from program ' + script_name + ': ' + stdout, message[0]);
+            }
+          });
         }
 
-        var execFile = require('child_process').execFile;
-        execFile(script_name, message.slice(2), {cwd: PLUGINS_DIR, env: state.variables}, function(error, stdout, stderr){
-          if (error !== null) {
-            logger('program ' + script_name + ' failed. error:\n' + error.stack + '\n', message[0]);
-          } else {
-            logger('got from program ' + script_name + ': ' + stdout, message[0]);
-          }
-        });
+        children.push(child_process);
         logger('calling ' + message[1] + '; arguments: ' + message.slice(2).join(', '), message[0]);
         cb('ok');
         break;
