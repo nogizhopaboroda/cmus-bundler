@@ -102,7 +102,6 @@ function on_message(message, cb){
         logger('got status: ' + message.join(' '), message[0]);
 
         state.status_programs.forEach(function(status_program){
-          var execFile = require('child_process').execFile;
           execFile(PLUGINS_DIR + '/' + status_program, message, {env: state.variables}, function(error, stdout, stderr){
             if (error !== null) {
               logger('status program ' + status_program + ' failed. error:\n' + error.stack + '\n', 'plugin');
