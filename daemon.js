@@ -4,7 +4,6 @@ var fs = require('fs');
 
 var logger = require('./logger')(process.argv[3] === 'debug' ? process.argv.slice(4) : ['info']);
 
-
 var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
 var CMUS_DIR = HOME_DIR + '/.cmus';
 var THEMES_DIR = CMUS_DIR + '/themes';
@@ -57,6 +56,26 @@ function on_message(message, cb){
         break;
       case "get":
         cb(state);
+        break;
+      case "call":
+        console.log(message.slice(2));
+        var script_name = '';
+        if(message[1] === 'cmd'){
+          script_name = __dirname + "/cmd_proxy.sh";
+        } else {
+          script_name = PLUGINS_DIR + '/' + message[1];
+        }
+
+        var execFile = require('child_process').execFile;
+        execFile(script_name, message.slice(2), {cwd: PLUGINS_DIR, env: state.variables}, function(error, stdout, stderr){
+          if (error !== null) {
+            logger('program ' + script_name + ' failed. error:\n' + error.stack + '\n', message[0]);
+          } else {
+            logger('got from program ' + script_name + ': ' + stdout, message[0]);
+          }
+        });
+        logger('calling ' + message[1] + '; arguments: ' + message.slice(2).join(', '), message[0]);
+        cb('ok');
         break;
       case "plugin":
       case "theme":
