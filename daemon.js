@@ -81,7 +81,7 @@ function on_message(message, cb){
       case "plugin":
       case "theme":
         logger('installing ' + message[0] + ': ' + message[1], message[0]);
-        install_plugin(message[0], message[1]);
+        install_plugin(message[0], message[1], message.slice(2));
         cb('ok');
         break;
       case "status_program":
@@ -127,10 +127,12 @@ function run_plugin(cmd_array, options, success_callback, error_callback){
     var child_process = execFile(script_name, cmd_array.slice(1), options, function(error, stdout, stderr){
       if (error !== null && error_callback) {
         error_callback(error.stack);
+        child_process.kill();
       } else {
         success_callback && success_callback(stdout);
       }
     });
+    return child_process;
   }
 
   children.push(child_process);
@@ -143,7 +145,7 @@ function clone_repo(link, target_dir, cbk){
   });
 }
 
-function install_plugin(type, link){
+function install_plugin(type, link, postinstall){
   var parts = link.split('#');
   var target_dir = 
     DIRS[type] +
@@ -157,6 +159,19 @@ function install_plugin(type, link){
       clone_repo(link, target_dir, function(){
         logger(link + ' installed', 'plugin');
         cmus_remote.stdin.write('echo ' + type + ' ' + link + ' installed\n');
+        if(postinstall.length > 0){
+          run_plugin(
+            postinstall,
+            {cwd: target_dir},
+            function(stdout){
+              logger('after install plugin ' + link + ' got: ' + stdout, 'plugin');
+            },
+            function(error_message){
+              logger('target_dir: ' + target_dir, 'plugin');
+              logger('after install plugin ' + link + ' failed with: ' + error_message, 'plugin');
+            }
+          );
+        }
       });
     }
   });

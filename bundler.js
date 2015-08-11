@@ -24,7 +24,7 @@ if(process.argv[2] === 'start'){
     function lookup(bundler_path){
       exec_async('pgrep -f "node ' + bundler_path + ' start"', function(error, stdout, stderr){
         if (error !== null) {
-          console.error('daemon is not running');
+          console.error('daemon is not running, command: ', process.argv.join(' '));
         } else {
           send_message(process.argv.slice(2));
         }
