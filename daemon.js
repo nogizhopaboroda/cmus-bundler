@@ -136,17 +136,9 @@ function run_plugin(cmd_array, options, success_callback, error_callback){
   children.push(child_process);
 }
 
-function run_cmd(cmd, args, callBack ) {
-    var child = spawn(cmd, args);
-    var resp = "";
- 
-    child.stdout.on('data', function (buffer) { resp += buffer.toString() });
-    child.stdout.on('end', function() { callBack (resp) });
-}
-
 function clone_repo(link, target_dir, cbk){
   logger(link + ' -> ' + target_dir, 'plugin');
-  run_cmd("git", ["clone", "git@github.com:" + link + ".git", target_dir], function(){
+  run_plugin(["cmd", "git clone git@github.com:" + link + ".git " + target_dir], {}, function(){
     cbk && cbk();
   });
 }
@@ -158,14 +150,16 @@ function install_plugin(type, link){
     "/" +
     parts[0].split('/')[1];
 
-  if(fs.existsSync(target_dir)){
-    logger(type + ': ' + link + ' already installed', type);
-  } else {
-    clone_repo(link, target_dir, function(){
-      logger(link + ' installed', 'plugin');
-      cmus_remote.stdin.write('echo ' + type + ' ' + link + ' installed\n');
-    });
-  }
+  fs.exists(target_dir, function(exists){
+    if(exists){
+      logger(type + ': ' + link + ' already installed', type);
+    } else {
+      clone_repo(link, target_dir, function(){
+        logger(link + ' installed', 'plugin');
+        cmus_remote.stdin.write('echo ' + type + ' ' + link + ' installed\n');
+      });
+    }
+  });
 }
 
 var server = dnode({
