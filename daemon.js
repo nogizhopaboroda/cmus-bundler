@@ -32,9 +32,11 @@ cmus_remote.stdout.on('data', function (data) {
 cmus_remote.stderr.on('data', function (data) {
   logger('stderr: ' + data, 'warning');
   logger('graceful death', 'info');
+
   children.forEach(function(child){
     child.kill();
   });
+
   process.exit(0);
 });
 
@@ -63,27 +65,16 @@ function on_message(message, cb){
         cb(state);
         break;
       case "call":
-        var script_name = '';
-        if(message[1] === 'cmd'){
-          var child_process = exec_async(message.slice(2).join(' '), function(error, stdout, stderr){
-            if (error !== null) {
-              logger('program failed: ' + error.stack, 'call');
-            } else {
-              logger('got from program: ' + stdout, 'call');
-            }
-          });
-        } else {
-          script_name = PLUGINS_DIR + '/' + message[1];
-          var child_process = execFile(script_name, message.slice(2), {cwd: PLUGINS_DIR}, function(error, stdout, stderr){
-            if (error !== null) {
-              logger('program ' + script_name + ' failed. error:\n' + error.stack + '\n', message[0]);
-            } else {
-              logger('got from program ' + script_name + ': ' + stdout, message[0]);
-            }
-          });
-        }
-
-        children.push(child_process);
+        run_plugin(
+          message.slice(1),
+          {cwd: PLUGINS_DIR},
+          function(stdout){
+            logger('got from program: ' + stdout, 'call');
+          },
+          function(error_message){
+            logger('program failed: ' + error_message, 'call');
+          }
+        );
         logger('calling ' + message[1] + '; arguments: ' + message.slice(2).join(', '), message[0]);
         cb('ok');
         break;
@@ -95,20 +86,23 @@ function on_message(message, cb){
         break;
       case "status_program":
         logger('setting status program: ' + message[1] + ', arguments: ' + message.slice(2), message[0]);
-        state.status_programs.push(message[1]);
+        state.status_programs.push(message[1] !== 'cmd' ? message[1] : message.slice(1));
         cb('ok');
         break;
       case "status":
         logger('got status: ' + message.join(' '), message[0]);
 
         state.status_programs.forEach(function(status_program){
-          execFile(PLUGINS_DIR + '/' + status_program, message, {env: state.variables}, function(error, stdout, stderr){
-            if (error !== null) {
-              logger('status program ' + status_program + ' failed. error:\n' + error.stack + '\n', 'plugin');
-            } else {
+          run_plugin(
+            [].concat(status_program).concat(message),
+            {env: state.variables},
+            function(stdout){
               logger('got from status program ' + status_program + ': ' + stdout, 'plugin');
+            },
+            function(error_message){
+              logger('status program ' + status_program + ' failed. error:\n' + error_message + '\n', 'plugin');
             }
-          });
+          );
         });
       
         cb('ok');
@@ -117,6 +111,29 @@ function on_message(message, cb){
         logger('unknown command: ' + message.join(' '), 'unknown');
         cb('ok');
     }
+}
+
+function run_plugin(cmd_array, options, success_callback, error_callback){
+  if(cmd_array[0] === 'cmd'){
+    var child_process = exec_async(cmd_array.slice(1).join(' '), options, function(error, stdout, stderr){
+      if (error !== null && error_callback) {
+        error_callback(error.stack);
+      } else {
+        success_callback && success_callback(stdout);
+      }
+    });
+  } else {
+    var script_name = PLUGINS_DIR + '/' + cmd_array[0];
+    var child_process = execFile(script_name, cmd_array.slice(1), options, function(error, stdout, stderr){
+      if (error !== null && error_callback) {
+        error_callback(error.stack);
+      } else {
+        success_callback && success_callback(stdout);
+      }
+    });
+  }
+
+  children.push(child_process);
 }
 
 function run_cmd(cmd, args, callBack ) {
