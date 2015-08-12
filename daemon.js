@@ -49,7 +49,7 @@ setInterval(function(){
   cmus_remote.stdin.write('\n');
 }, 1000);
 
-logger('daemon started', 'info');
+logger('\ndaemon started', 'info');
 
 function on_message(message, cb){
 
@@ -62,7 +62,7 @@ function on_message(message, cb){
         cb('ok');
         break;
       case "get":
-        cb(state);
+        cb(JSON.stringify(state);
         break;
       case "call":
         run_plugin(
