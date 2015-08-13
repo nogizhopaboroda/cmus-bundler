@@ -62,7 +62,7 @@ function on_message(message, cb){
         cb('ok');
         break;
       case "get":
-        cb(JSON.stringify(state);
+        cb(JSON.stringify(state));
         break;
       case "call":
         run_plugin(
@@ -177,9 +177,37 @@ function install_plugin(type, link, postinstall){
   });
 }
 
-var server = dnode({
-  message: function (message, cb) {
-    on_message(message, cb);
+
+function run(){
+  var net = require('net');
+  var server = net.createServer({allowHalfOpen: true}, function(c) { //'connection' listener
+    //console.log('client connected');
+    c.on('data', function(data) {
+      console.log('client send data', JSON.parse(data));
+
+      on_message(JSON.parse(data), function(resp){
+        c.write(JSON.stringify(resp) + '\n');
+      })
+
+    });
+    c.on('end', function() {
+      //console.log('client disconnected');
+    });
+  });
+  server.listen(__dirname + '/socket.sock', function() { //'listening' listener
+    console.log('\n\nserver bound');
+  });
+}
+
+
+var fs = require('fs');
+
+fs.exists(__dirname + '/socket.sock', function(exists) {
+  if (exists) {
+    // serve file
+    fs.unlink(__dirname + '/socket.sock', function(){ run(); })
+  } else {
+    run();
   }
 });
-server.listen(5004);
+
