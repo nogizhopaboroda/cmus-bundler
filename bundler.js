@@ -5,7 +5,6 @@ var exec_async = require('child_process').exec;
 var logger = require('./logger')();
 var Client = require('./socket').Client;
 
-global.SOCKET_PATH = __dirname + '/socket.sock';
 
 if(process.argv[2] === 'start'){
   require('./daemon');

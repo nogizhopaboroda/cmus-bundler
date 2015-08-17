@@ -4,7 +4,11 @@ var exec_async = require('child_process').exec;
 var execFile = require('child_process').execFile;
 var net = require('net');
 
+var Socket = require('./socket');
+var Server = Socket.Server;
+var delete_socket = Socket.delete_socket;
 var logger = require('./logger')(process.argv[3] === 'debug' ? process.argv.slice(4) : ['info']);
+
 
 var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
 var CMUS_DIR = HOME_DIR + '/.cmus';
@@ -183,32 +187,7 @@ function install_plugin(type, link, postinstall){
 }
 
 
-function run(){
-  var server = net.createServer({allowHalfOpen: true}, function(c) { //'connection' listener
-    c.on('data', function(data) {
-      on_message(JSON.parse(data), function(resp){
-        process.nextTick(function(){
-          c.write(JSON.stringify(resp) + '\n');
-        });
-      });
-    });
-    c.on('end', function() {});
-  });
-  server.listen(SOCKET_PATH, function() { /*'listening' listener */ });
-}
-
-
-function delete_socket(cbk){
-  fs.unlink(SOCKET_PATH, function(){
-    cbk && cbk();
-  })
-}
-
-fs.exists(SOCKET_PATH, function(exists) {
-  if (exists) {
-    delete_socket(run);
-  } else {
-    run();
-  }
-});
+Server()
+  .then(on_message)
+  .run()
 

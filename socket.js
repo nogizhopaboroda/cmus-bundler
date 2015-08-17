@@ -1,10 +1,16 @@
 var net = require('net');
+var fs = require('fs');
 
 var SOCKET_PATH = __dirname + '/socket.sock';
 var MAX_RECONNECTS = 3;
 var RECONNECT_TOMEOUT = 100;
 
 module.exports = {
+  delete_socket: function(cbk){
+    fs.unlink(SOCKET_PATH, function(){
+      cbk && cbk();
+    });
+  },
   Client: function(){
     var q = {};
     return {
@@ -52,6 +58,43 @@ module.exports = {
         client.on('timeout', function() { });
         client.on('end', function() { });
       }
+    };
+  },
+  Server: function(){
+    var library = this;
+    var q = {};
+
+    function run(){
+      var server = net.createServer({allowHalfOpen: true}, function(c) { //'connection' listener
+        c.on('data', function(data) {
+          q.on_message && q.on_message(JSON.parse(data), function(resp){
+            process.nextTick(function(){
+              c.write(JSON.stringify(resp) + '\n');
+            });
+          });
+        });
+        c.on('end', function() {});
+      });
+      server.listen(SOCKET_PATH, function() { /*'listening' listener */ });
     }
+
+    return {
+      then: function(cbk){
+        q.on_message = cbk;
+        return this;
+      },
+      run: function(){
+        var self = this;
+
+        fs.exists(SOCKET_PATH, function(exists) {
+          if (exists) {
+            library.delete_socket(run);
+          } else {
+            run();
+          }
+        });
+
+      }
+    };
   }
 }
