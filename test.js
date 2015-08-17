@@ -1,3 +1,4 @@
+var Client = require('./socket').Client;
 var spawn = require('child_process').spawn;
 var colors = require('colors/safe');
 var argv = require('optimist')
@@ -50,38 +51,25 @@ function run(counter){
   });
 
   setTimeout(function(){
-    send_message(['get']);
+    Client()
+      .message(['get'])
+      .then(function(data){
+        var queue_length = data.queue.length;
+        var color = 'green';
+        if(+queue_length < +QUEUE_COUNT){
+          color = 'red';
+          stat.failed_tests++;
+          stat.missed_settings += QUEUE_COUNT - queue_length;
+        } else {
+          stat.success_tests++;
+        }
+        console.log(colors[color]('queue length: ' + queue_length))
+        console.log('killing\n\n');
+        cmus_remote.kill();
+      })
+      .run();
   }, INIT_TIMEOUT);
 
-
-
-  function send_message(message){
-    var net = require('net');
-    var client = net.connect(
-      {path: __dirname + '/socket.sock'},
-      function() { //'connect' listener
-        client.write(JSON.stringify(message) + '\n');
-      }
-    );
-
-    client.on('data', function(data) {
-      var queue_length = JSON.parse(JSON.parse(data.toString())).queue.length;
-      var color = 'green';
-      if(+queue_length < +QUEUE_COUNT){
-        color = 'red';
-        stat.failed_tests++;
-        stat.missed_settings += QUEUE_COUNT - queue_length;
-      } else {
-        stat.success_tests++;
-      }
-      console.log(colors[color]('queue length: ' + queue_length))
-      console.log('killing\n\n');
-      cmus_remote.kill();
-      client.end();
-    });
-    client.on('end', function() {
-    });
-  }
 }
 
 

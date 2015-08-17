@@ -2,14 +2,10 @@
 
 var package_info = require('./package.json');
 var exec_async = require('child_process').exec;
-var net = require('net');
 var logger = require('./logger')();
-
-var MAX_RECONNECTS = 3;
-var RECONNECT_TOMEOUT = 100;
+var Client = require('./socket').Client;
 
 global.SOCKET_PATH = __dirname + '/socket.sock';
-
 
 if(process.argv[2] === 'start'){
   require('./daemon');
@@ -37,7 +33,21 @@ if(process.argv[2] === 'start'){
           console.log('daemon is not running, command: ', process.argv.slice(2).join(' '));
         } else {
           process.nextTick(function(){
-            send_m(process.argv.slice(2), 0);
+            Client()
+              .message(process.argv.slice(2))
+              .error(function(e){
+                logger('got error: ' + e.code, 'error');
+              })
+              .reconnect(function(current_turn){
+                logger('reconnect #' + current_turn + '...\n', 'info');
+              })
+              .then(function(data){
+                console.log(data);
+                process.nextTick(function(){
+                  process.exit(0);
+                });
+              })
+              .run();
           });
         }
       });
@@ -45,30 +55,3 @@ if(process.argv[2] === 'start'){
 }
 
 
-function send_m(message, current_turn){
-  var client = net.connect(
-    {path: SOCKET_PATH},
-    function() { //'connect' listener
-      client.write(JSON.stringify(message) + '\n');
-    }
-  );
-  client.on('data', function(data) {
-    console.log(JSON.parse(JSON.parse(data)));
-    client.destroy();
-    process.nextTick(function(){
-      process.exit(0);
-    });
-  });
-  client.on('error', function(e) {
-    //could be something better...
-    logger('got error: ' + e.code, 'error');
-    if(current_turn < MAX_RECONNECTS){
-      logger('reconnect #' + current_turn + '...\n', 'info');
-      setTimeout(function(){
-        send_m(message, current_turn + 1);
-      }, RECONNECT_TOMEOUT);
-    }
-  });
-  client.on('timeout', function() { });
-  client.on('end', function() { });
-}
