@@ -8,6 +8,8 @@ var logger = require('./logger')();
 var MAX_RECONNECTS = 3;
 var RECONNECT_TOMEOUT = 100;
 
+global.SOCKET_PATH = __dirname + '/socket.sock';
+
 
 if(process.argv[2] === 'start'){
   require('./daemon');
@@ -45,7 +47,7 @@ if(process.argv[2] === 'start'){
 
 function send_m(message, current_turn){
   var client = net.connect(
-    {path: __dirname + '/socket.sock'},
+    {path: SOCKET_PATH},
     function() { //'connect' listener
       client.write(JSON.stringify(message) + '\n');
     }

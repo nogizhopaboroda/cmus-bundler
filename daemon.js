@@ -37,7 +37,11 @@ cmus_remote.stderr.on('data', function (data) {
     child.kill();
   });
 
-  process.exit(0);
+  delete_socket(function(){
+    logger('deleting socket', 'info');
+    process.exit(0);
+  });
+
 });
 
 cmus_remote.on('close', function (code) {
@@ -49,7 +53,7 @@ setInterval(function(){
   cmus_remote.stdin.write('\n');
 }, 1000);
 
-logger('\ndaemon started', 'info');
+logger('daemon started\n', 'info');
 
 function on_message(message, cb){
 
@@ -190,17 +194,17 @@ function run(){
     });
     c.on('end', function() {});
   });
-  server.listen(__dirname + '/socket.sock', function() { /*'listening' listener */ });
+  server.listen(SOCKET_PATH, function() { /*'listening' listener */ });
 }
 
 
 function delete_socket(cbk){
-  fs.unlink(__dirname + '/socket.sock', function(){
+  fs.unlink(SOCKET_PATH, function(){
     cbk && cbk();
   })
 }
 
-fs.exists(__dirname + '/socket.sock', function(exists) {
+fs.exists(SOCKET_PATH, function(exists) {
   if (exists) {
     delete_socket(run);
   } else {
