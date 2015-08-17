@@ -1,4 +1,24 @@
 var colors = require('colors/safe');
+var argv = require('optimist')
+    .usage('Usage: $0')
+    .describe('r', 'Respawn timeout')
+    .describe('i', 'Initial timeout')
+    .describe('c', 'Count of tests')
+    .describe('q', 'Queue length needed')
+    .demand('q')
+    .argv;
+
+var RESPAWN_TIMEOUT = argv.r || 3000,
+    INIT_TIMEOUT    = argv.i || 3000,
+    COUNT           = argv.c || 1,
+    QUEUE_COUNT     = argv.q;
+
+
+var stat = {
+  "failed_tests": 0,
+  "success_tests": 0,
+  "missed_settings": 0
+}
 
 function run(counter){
   console.log('starting');
@@ -15,36 +35,46 @@ function run(counter){
   });
 
   cmus_remote.on('close', function (code) {
-        if(counter < 2){
+        if(counter < COUNT){
           setTimeout(function(){
             run(counter + 1);
-          }, 3000);
+          }, RESPAWN_TIMEOUT);
+        } else {
+          console.log(colors.yellow('total tests: ' + COUNT));
+          console.log(colors.red('failed tests: ' + stat.failed_tests));
+          console.log(colors.green('success tests: ' + stat.success_tests));
+          console.log('\n');
+          console.log(colors.red('missed settings: ' + stat.missed_settings));
+          console.log(colors.blue('total settings: ' + +COUNT * +QUEUE_COUNT));
         }
-    //process.exit(0);
   });
 
   setTimeout(function(){
     send_message(['get']);
-  }, 3000);
+  }, INIT_TIMEOUT);
 
 
 
   function send_message(message){
     var net = require('net');
-    var client = net.connect({path: __dirname + '/socket.sock'},
-                             function() { //'connect' listener
-      client.write(JSON.stringify(message) + '\n');
-    });
+    var client = net.connect(
+      {path: __dirname + '/socket.sock'},
+      function() { //'connect' listener
+        client.write(JSON.stringify(message) + '\n');
+      }
+    );
 
     client.on('data', function(data) {
       var queue_length = JSON.parse(JSON.parse(data.toString())).queue.length;
-      if(queue_length < 10){
-        console.log(colors.red('queue length: ' + queue_length));
-        //cmus_remote.kill();
-        process.exit(0);
+      var color = 'green';
+      if(+queue_length < +QUEUE_COUNT){
+        color = 'red';
+        stat.failed_tests++;
+        stat.missed_settings += QUEUE_COUNT - queue_length;
       } else {
-        console.log(colors.green('queue length: ' + queue_length));
+        stat.success_tests++;
       }
+      console.log(colors[color]('queue length: ' + queue_length))
       console.log('killing\n\n');
       cmus_remote.kill();
       client.end();
@@ -55,4 +85,4 @@ function run(counter){
 }
 
 
-run(0);
+run(1);

@@ -1,4 +1,3 @@
-var dnode = require('dnode');
 var spawn = require('child_process').spawn;
 var fs = require('fs');
 var exec_async = require('child_process').exec;
@@ -70,13 +69,14 @@ function on_message(message, cb){
           {cwd: PLUGINS_DIR},
           function(stdout){
             logger('got from program: ' + stdout, 'call');
+            cb('ok');
           },
           function(error_message){
             logger('program failed: ' + error_message, 'call');
+            cb('ok');
           }
         );
         logger('calling ' + message[1] + '; arguments: ' + message.slice(2).join(', '), message[0]);
-        cb('ok');
         break;
       case "plugin":
       case "theme":
@@ -181,13 +181,17 @@ function install_plugin(type, link, postinstall){
 function run(){
   var net = require('net');
   var server = net.createServer({allowHalfOpen: true}, function(c) { //'connection' listener
-    //console.log('client connected');
+    console.log('client connected');
     c.on('data', function(data) {
-      console.log('client send data', JSON.parse(data));
+      //console.log('client send data', JSON.parse(data));
 
-      on_message(JSON.parse(data), function(resp){
-        c.write(JSON.stringify(resp) + '\n');
-      })
+      setImmediate(function(){
+        on_message(JSON.parse(data), function(resp){
+          setImmediate(function(){
+            c.write(JSON.stringify(resp) + '\n');
+          });
+        });
+      });
 
     });
     c.on('end', function() {
