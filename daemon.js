@@ -2,6 +2,7 @@ var spawn = require('child_process').spawn;
 var fs = require('fs');
 var exec_async = require('child_process').exec;
 var execFile = require('child_process').execFile;
+var net = require('net');
 
 var logger = require('./logger')(process.argv[3] === 'debug' ? process.argv.slice(4) : ['info']);
 
@@ -30,7 +31,7 @@ cmus_remote.stdout.on('data', function (data) {
 
 cmus_remote.stderr.on('data', function (data) {
   logger('stderr: ' + data, 'warning');
-  logger('graceful death', 'info');
+  logger('graceful shutdown', 'info');
 
   children.forEach(function(child){
     child.kill();
@@ -179,37 +180,29 @@ function install_plugin(type, link, postinstall){
 
 
 function run(){
-  var net = require('net');
   var server = net.createServer({allowHalfOpen: true}, function(c) { //'connection' listener
-    console.log('client connected');
     c.on('data', function(data) {
-      //console.log('client send data', JSON.parse(data));
-
-      setImmediate(function(){
-        on_message(JSON.parse(data), function(resp){
-          setImmediate(function(){
-            c.write(JSON.stringify(resp) + '\n');
-          });
+      on_message(JSON.parse(data), function(resp){
+        process.nextTick(function(){
+          c.write(JSON.stringify(resp) + '\n');
         });
       });
-
     });
-    c.on('end', function() {
-      //console.log('client disconnected');
-    });
+    c.on('end', function() {});
   });
-  server.listen(__dirname + '/socket.sock', function() { //'listening' listener
-    console.log('\n\nserver bound');
-  });
+  server.listen(__dirname + '/socket.sock', function() { /*'listening' listener */ });
 }
 
 
-var fs = require('fs');
+function delete_socket(cbk){
+  fs.unlink(__dirname + '/socket.sock', function(){
+    cbk && cbk();
+  })
+}
 
 fs.exists(__dirname + '/socket.sock', function(exists) {
   if (exists) {
-    // serve file
-    fs.unlink(__dirname + '/socket.sock', function(){ run(); })
+    delete_socket(run);
   } else {
     run();
   }

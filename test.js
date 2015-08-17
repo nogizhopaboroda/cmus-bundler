@@ -1,3 +1,4 @@
+var spawn = require('child_process').spawn;
 var colors = require('colors/safe');
 var argv = require('optimist')
     .usage('Usage: $0')
@@ -22,7 +23,6 @@ var stat = {
 
 function run(counter){
   console.log('starting');
-  var spawn = require('child_process').spawn;
 
   var cmus_remote = spawn('cmus', []);
 
