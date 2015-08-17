@@ -2,12 +2,15 @@
 
 var package_info = require('./package.json');
 var exec_async = require('child_process').exec;
+var net = require('net');
+var logger = require('./logger')();
+
+var MAX_RECONNECTS = 3;
+var RECONNECT_TOMEOUT = 100;
 
 
 if(process.argv[2] === 'start'){
-  setImmediate(function(){
-    require('./daemon');
-  });
+  require('./daemon');
 } else if(process.argv[2] === '-v' || process.argv[2] === 'version'){
   console.log(package_info.version);
 } else if(process.argv[2] === '-h' || process.argv[2] === 'help'){
@@ -16,11 +19,11 @@ if(process.argv[2] === 'start'){
   
     exec_async('which cmus-bundler', function(error, stdout, stderr){
       if (error !== null) {
-        setImmediate(function(){
+        process.nextTick(function(){
           lookup(__filename);
         });
       } else {
-        setImmediate(function(){
+        process.nextTick(function(){
           lookup(stdout.replace('\n', ''));
         });
       }
@@ -31,75 +34,39 @@ if(process.argv[2] === 'start'){
         if (error !== null) {
           console.log('daemon is not running, command: ', process.argv.slice(2).join(' '));
         } else {
-          //send_message(process.argv.slice(2));
-          var tmt = 0;
-          //if(process.argv[2] === 'set'){
-            //tmt = 100;
-          //}
-          //if(process.argv[2] === 'plugin'){
-            //tmt = 200;
-          //}
-          //if(process.argv[2] === 'theme'){
-            //tmt = 300;
-          //}
-          //if(process.argv[2] === 'call'){
-            //tmt = 400;
-          //}
-          //if(process.argv[2] === 'status_program'){
-            //tmt = 500;
-          //}
-          //setTimeout(function(){
-            //console.log("vt program: ", process.argv.slice(2));
-            //send_m(process.argv.slice(2));
-          //}, tmt);
-          //setTimeout(function(){
+          process.nextTick(function(){
             send_m(process.argv.slice(2), 0);
-          //}, 500);
+          });
         }
       });
     }
 }
 
 
-var MAX_RECONNECTS = 3;
-var RECONNECT_TOMEOUT = 100;
-
-var net = require('net');
 function send_m(message, current_turn){
-  //console.log("vt program: ", process.argv.slice(2));
-  var client = net.connect({path: __dirname + '/socket.sock'},
-                           function() { //'connect' listener
-    //bottleneck!!!
-    //
-    //console.log('connected to server!');
-    setImmediate(function(){
+  var client = net.connect(
+    {path: __dirname + '/socket.sock'},
+    function() { //'connect' listener
       client.write(JSON.stringify(message) + '\n');
-    });
-  });
+    }
+  );
   client.on('data', function(data) {
-    console.log(JSON.parse(JSON.parse(data)), "program: ", message);
-    setImmediate(function(){
-      client.end();
+    console.log(JSON.parse(JSON.parse(data)));
+    client.destroy();
+    process.nextTick(function(){
       process.exit(0);
     });
   });
-  client.on('connect', function(e) {
-    //console.log('connect');
-  });
   client.on('error', function(e) {
     //could be something better...
-    console.log('error!!!!, ', e);
+    logger('got error: ' + e.code, 'error');
     if(current_turn < MAX_RECONNECTS){
-      console.log('reconnect');
+      logger('reconnect #' + current_turn + '...\n', 'info');
       setTimeout(function(){
         send_m(message, current_turn + 1);
       }, RECONNECT_TOMEOUT);
     }
   });
-  client.on('timeout', function() {
-    console.log('timeout!!!!');
-  });
-  client.on('end', function() {
-    //console.log('disconnected from server');
-  });
+  client.on('timeout', function() { });
+  client.on('end', function() { });
 }
