@@ -10,14 +10,10 @@ var delete_socket = Socket.delete_socket;
 var logger = require('./logger')(process.argv[3] === 'debug' ? process.argv.slice(4) : ['info']);
 
 
-var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
-var CMUS_DIR = HOME_DIR + '/.cmus';
-var THEMES_DIR = CMUS_DIR + '/themes';
-var PLUGINS_DIR = CMUS_DIR + '/plugins';
-var DIRS = {
-  'plugin': PLUGINS_DIR,
-  'theme': THEMES_DIR,
-};
+//var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
+//var CMUS_DIR = HOME_DIR + '/.cmus';
+//var THEMES_DIR = CMUS_DIR + '/themes';
+//var PLUGINS_DIR = CMUS_DIR + '/plugins';
 
 var children = [];
 var state = {
@@ -27,37 +23,43 @@ var state = {
 };
 
   
-var cmus_remote = spawn('cmus-remote', []);
+function init(){
+  var cmus_remote = spawn('cmus-remote', []);
 
-cmus_remote.stdout.on('data', function (data) {
-  logger('stdout: ' + data, 'stdout');
-});
-
-cmus_remote.stderr.on('data', function (data) {
-  logger('stderr: ' + data, 'warning');
-  logger('graceful shutdown', 'info');
-
-  children.forEach(function(child){
-    child.kill();
+  cmus_remote.stdout.on('data', function (data) {
+    logger('stdout: ' + data, 'stdout');
   });
 
-  delete_socket(function(){
-    logger('deleting socket', 'info');
+  cmus_remote.stderr.on('data', function (data) {
+    logger('stderr: ' + data, 'warning');
+    logger('graceful shutdown', 'info');
+
+    children.forEach(function(child){
+      child.kill();
+    });
+
+    delete_socket(function(){
+      logger('deleting socket', 'info');
+      process.exit(0);
+    });
+
+  });
+
+  cmus_remote.on('close', function (code) {
+    logger('child process exited with code ' + code, 'info');
     process.exit(0);
   });
 
-});
+  setInterval(function(){
+    cmus_remote.stdin.write('\n');
+  }, 1000);
 
-cmus_remote.on('close', function (code) {
-  logger('child process exited with code ' + code, 'info');
-  process.exit(0);
-});
+  Server()
+    .then(on_message)
+    .run()
 
-setInterval(function(){
-  cmus_remote.stdin.write('\n');
-}, 1000);
-
-logger('daemon started\n', 'info');
+  logger('daemon started\n', 'info');
+}
 
 function on_message(message, cb){
 
@@ -90,7 +92,6 @@ function on_message(message, cb){
       case "plugin":
       case "theme":
         logger('installing ' + message[0] + ': ' + message[1], message[0]);
-        install_plugin(message[0], message[1], message.slice(2));
         cb('ok');
         break;
       case "status_program":
@@ -147,47 +148,9 @@ function run_plugin(cmd_array, options, success_callback, error_callback){
   children.push(child_process);
 }
 
-function clone_repo(link, target_dir, cbk){
-  logger(link + ' -> ' + target_dir, 'plugin');
-  run_plugin(["cmd", "git clone git@github.com:" + link + ".git " + target_dir], {}, function(){
-    cbk && cbk();
-  });
+
+module.exports = {
+  run_plugin: run_plugin,
+  init: init
 }
-
-function install_plugin(type, link, postinstall){
-  var parts = link.split('#');
-  var target_dir = 
-    DIRS[type] +
-    "/" +
-    parts[0].split('/')[1];
-
-  fs.exists(target_dir, function(exists){
-    if(exists){
-      logger(type + ': ' + link + ' already installed', type);
-    } else {
-      clone_repo(link, target_dir, function(){
-        logger(link + ' installed', 'plugin');
-        cmus_remote.stdin.write('echo ' + type + ' ' + link + ' installed\n');
-        if(postinstall.length > 0){
-          run_plugin(
-            postinstall,
-            {cwd: target_dir},
-            function(stdout){
-              logger('after install plugin ' + link + ' got: ' + stdout, 'plugin');
-            },
-            function(error_message){
-              logger('target_dir: ' + target_dir, 'plugin');
-              logger('after install plugin ' + link + ' failed with: ' + error_message, 'plugin');
-            }
-          );
-        }
-      });
-    }
-  });
-}
-
-
-Server()
-  .then(on_message)
-  .run()
 

@@ -5,12 +5,14 @@ var SOCKET_PATH = __dirname + '/socket.sock';
 var MAX_RECONNECTS = 3;
 var RECONNECT_TOMEOUT = 100;
 
+function delete_socket(cbk){
+  fs.unlink(SOCKET_PATH, function(){
+    cbk && cbk();
+  });
+}
+
 module.exports = {
-  delete_socket: function(cbk){
-    fs.unlink(SOCKET_PATH, function(){
-      cbk && cbk();
-    });
-  },
+  delete_socket: delete_socket,
   Client: function(){
     var q = {};
     return {
@@ -33,7 +35,7 @@ module.exports = {
       run: function(current_turn){
         var self = this;
 
-        current_turn = current_turn || 0;
+        var current_turn = current_turn || 0;
 
         var client = net.connect(
           {path: SOCKET_PATH},
@@ -43,7 +45,7 @@ module.exports = {
         );
         client.on('data', function(data) {
           client.destroy();
-          q.on_success && q.on_success(JSON.parse(JSON.parse(data)));
+          q.on_success && q.on_success(JSON.parse(data));
         });
         client.on('error', function(e) {
           //could be something better...
@@ -51,7 +53,7 @@ module.exports = {
           if(current_turn < MAX_RECONNECTS){
             q.on_reconnect && q.on_reconnect(current_turn);
             setTimeout(function(){
-              self.run(q.message, current_turn + 1);
+              self.run(current_turn + 1);
             }, RECONNECT_TOMEOUT);
           }
         });
@@ -61,7 +63,6 @@ module.exports = {
     };
   },
   Server: function(){
-    var library = this;
     var q = {};
 
     function run(){
@@ -88,7 +89,7 @@ module.exports = {
 
         fs.exists(SOCKET_PATH, function(exists) {
           if (exists) {
-            library.delete_socket(run);
+            delete_socket(run);
           } else {
             run();
           }

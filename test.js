@@ -54,7 +54,7 @@ function run(counter){
     Client()
       .message(['get'])
       .then(function(data){
-        var queue_length = data.queue.length;
+        var queue_length = JSON.parse(data).queue.length;
         var color = 'green';
         if(+queue_length < +QUEUE_COUNT){
           color = 'red';
