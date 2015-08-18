@@ -22,6 +22,8 @@ if(process.argv[2] === 'start'){
 } else if(process.argv[2] === 'plugin' || process.argv[2] === 'theme'){
   var message = process.argv.slice(2);
   install_plugin(message[0], message[1], message.slice(2));
+} else if(process.argv[2] === 'plugins_path'){
+  process.stdin.write(global.PLUGINS_DIR);
 } else if(process.argv[2] === '-v' || process.argv[2] === 'version'){
   console.log(package_info.version);
 } else if(process.argv[2] === '-h' || process.argv[2] === 'help'){
