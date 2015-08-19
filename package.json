@@ -8,10 +8,10 @@
   },
   "preferGlobal": "true",
   "dependencies": {
+    "colors": "^1.1.2",
     "optimist": "^0.6.1"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "scripts": {},
   "repository": {
     "type": "git",
