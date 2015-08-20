@@ -10,11 +10,6 @@ var delete_socket = Socket.delete_socket;
 var logger = require('./logger')(process.argv[3] === 'debug' ? process.argv.slice(4) : ['info']);
 
 
-//var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
-//var CMUS_DIR = HOME_DIR + '/.cmus';
-//var THEMES_DIR = CMUS_DIR + '/themes';
-//var PLUGINS_DIR = CMUS_DIR + '/plugins';
-
 var children = [];
 var state = {
   "variables": {},
