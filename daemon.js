@@ -143,9 +143,30 @@ function run_plugin(cmd_array, options, success_callback, error_callback){
   children.push(child_process);
 }
 
+function lookup_self(command, ifyes_callback, ifno_callback){
+    exec_async('which cmus-bundler', function(error, stdout, stderr){
+      var bundler_path;
+      if (error !== null) {
+        bundler_path = module.parent.filename;
+      } else {
+        bundler_path = stdout.replace('\n', '');
+      }
+      process.nextTick(function(){
+        exec_async('pgrep -f "node ' + bundler_path + ' ' + command + '"', function(error, stdout, stderr){
+          if (error !== null) {
+            ifno_callback();
+          } else {
+            ifyes_callback();
+          }
+        });
+      });
+    });
+}
+
 
 module.exports = {
   run_plugin: run_plugin,
-  init: init
+  init: init,
+  lookup: lookup_self
 }
 

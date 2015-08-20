@@ -32,7 +32,7 @@ if(process.argv[2] === 'start'){
   console.log('help!!!');
 } else {
 
-    lookup_self(
+    daemon.lookup(
       'start',
       function(){
         send_message(process.argv.slice(2));
@@ -41,26 +41,6 @@ if(process.argv[2] === 'start'){
         console.log('daemon is not running, command: ', process.argv.slice(2).join(' '));
       }
     );
-}
-
-function lookup_self(command, ifyes_callback, ifno_callback){
-    exec_async('which cmus-bundler', function(error, stdout, stderr){
-      var path;
-      if (error !== null) {
-        bundler_path = __filename;
-      } else {
-        bundler_path = stdout.replace('\n', '');
-      }
-      process.nextTick(function(){
-        exec_async('pgrep -f "node ' + bundler_path + ' ' + command + '"', function(error, stdout, stderr){
-          if (error !== null) {
-            ifno_callback();
-          } else {
-            ifyes_callback();
-          }
-        });
-      });
-    });
 }
 
 function send_message(message){
