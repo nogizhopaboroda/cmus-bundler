@@ -78,6 +78,7 @@ function install_plugin(type, link, postinstall){
     send_message(process.argv.slice(2));
     if(exists){
       logger(type + ': ' + link + ' already installed', type);
+      send_message(process.argv.slice(2, 4).concat('ok'));
     } else {
       clone_repo(link, target_dir, function(){
         logger(link + ' installed', 'plugin');
@@ -88,14 +89,16 @@ function install_plugin(type, link, postinstall){
             {cwd: target_dir},
             function(stdout){
               logger('after install plugin ' + link + ' got: ' + stdout, 'plugin');
+              send_message(process.argv.slice(2, 4).concat('ok'));
             },
             function(error_message){
               logger('target_dir: ' + target_dir, 'plugin');
               logger('after install plugin ' + link + ' failed with: ' + error_message, 'plugin');
+              send_message(process.argv.slice(2, 4).concat('ok'));
             }
           );
         } else {
-          //send_message(process.argv.slice(2))
+          send_message(process.argv.slice(2, 4).concat('ok'));
         }
       });
     }

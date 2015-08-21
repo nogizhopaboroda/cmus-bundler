@@ -163,10 +163,37 @@ function lookup_self(command, ifyes_callback, ifno_callback){
     });
 }
 
+
+var install_queue = {};
 function install(){
-  setTimeout(function(){
-    console.log('exit');
-  }, 5000);
+  console.log('waiting...');
+  Server()
+    .then(function(message, cb){
+      if(message[0] === 'theme' || message[0] === 'plugin'){
+        if(message[2] === 'ok'){
+          setTimeout(function(){
+            install_queue[message[1]] = true;
+            console.log(666, message);
+
+            var need_exit = true;
+            for(var key in install_queue){
+              if(install_queue[key] === false){
+                need_exit = false;
+                break;
+              }
+            }
+            need_exit && process.exit(0);
+
+            cb('ok');
+          }, 100);
+        } else {
+          install_queue[message[1]] = false;
+          //console.log(message);
+          cb('ok');
+        }
+      }
+    })
+    .run()
 }
 
 
