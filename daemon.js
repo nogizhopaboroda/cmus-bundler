@@ -163,10 +163,25 @@ function lookup_self(command, ifyes_callback, ifno_callback){
     });
 }
 
+function install(){
+  setTimeout(function(){
+    console.log('exit');
+  }, 5000);
+}
+
 
 module.exports = {
   run_plugin: run_plugin,
-  init: init,
+  init: function(){
+    lookup_self(
+      'install',
+      function(){
+        console.log('install running');
+      },
+      init
+    )
+  },
+  install: install,
   lookup: lookup_self
 }
 

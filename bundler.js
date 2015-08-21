@@ -20,7 +20,7 @@ global.DIRS = {
 if(process.argv[2] === 'start'){
   daemon.init();
 } else if(process.argv[2] === 'install'){
-  daemon.init('install');
+  daemon.install();
 } else if(process.argv[2] === 'plugin' || process.argv[2] === 'theme'){
   var message = process.argv.slice(2);
   install_plugin(message[0], message[1], message.slice(2));
