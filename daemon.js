@@ -166,6 +166,13 @@ function lookup_self(command, ifyes_callback, ifno_callback){
 
 
 function install(){
+
+  var cmus = spawn('cmus', []);
+
+  cmus.stdout.on('data', function (data) { cmus.kill(); }); 
+  cmus.stderr.on('data', function (data) { cmus.kill(); });
+  cmus.on('close', function (code) {});
+
   var install_queue = {};
   process.stdout.write('waiting...\n');
   Server()
