@@ -3,6 +3,7 @@ var fs = require('fs');
 var exec_async = require('child_process').exec;
 var execFile = require('child_process').execFile;
 var net = require('net');
+var colors = require('colors/safe');
 
 var Socket = require('./socket');
 var Server = Socket.Server;
@@ -164,16 +165,16 @@ function lookup_self(command, ifyes_callback, ifno_callback){
 }
 
 
-var install_queue = {};
 function install(){
-  process.stdout.write('waiting...');
+  var install_queue = {};
+  process.stdout.write('waiting...\n');
   Server()
     .then(function(message, cb){
       if(message[0] === 'theme' || message[0] === 'plugin'){
         if(message[2] === 'ok'){
           setTimeout(function(){
             install_queue[message[1]] = true;
-            process.stdout.write('installing '+ message[1] + ' ok\n');
+            process.stdout.write(message[1] + colors.green(' installed\n'));
 
             var need_exit = true;
             for(var key in install_queue){
