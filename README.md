@@ -5,12 +5,12 @@ Plugin manager for [C* Music Player](https://github.com/cmus/cmus)
 
   * [Dependencies](#dependencies)
   * [Installation](#installation)
-  * [Configuring rc file](#configuring)
-  * [Preinstall bundles](#preinstall_bundles)
+  * [Configuring rc file](#configuring-cmus-rc-file)
+  * [Preinstall bundles](#preinstall-bundles)
   * [Showcases](#showcases)
   * [Debug](#debug)
-  * [Known plugins](#known_plugins)
-  * [Bugs/Issues](#bugs)
+  * [Known plugins](#known-plugins)
+  * [Bugs/Issues](#bugsissues)
 
 
 
