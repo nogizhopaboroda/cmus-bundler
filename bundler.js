@@ -1,5 +1,26 @@
 #!/usr/bin/env node
 
+function help_message(){/*
+  Usage: cmus-bundler [option]
+
+  Options:
+
+    -h, help            output usage information
+    -v, version         output the version number
+    -i, install         install all plugins and themes
+    -p, plugins_path    print plugins path
+    -m, man             print manual
+
+  Examples:
+
+    $ cmus-bundler -i
+    $ $(cmus-bundler -p)/plugin_foo/binary_file
+
+  For more information read the manual:
+    $ cmus-bundler man
+*/};
+
+
 var package_info = require('./package.json');
 var exec_async = require('child_process').exec;
 var fs = require('fs');
@@ -19,19 +40,20 @@ global.DIRS = {
 
 if(process.argv[2] === 'start'){
   daemon.init();
-} else if(process.argv[2] === 'install'){
+} else if(process.argv[2] === '-i' || process.argv[2] === 'install'){
   daemon.install();
 } else if(process.argv[2] === 'plugin' || process.argv[2] === 'theme'){
   var message = process.argv.slice(2);
   install_plugin(message[0], message[1], message.slice(2));
-} else if(process.argv[2] === 'plugins_path'){
+} else if(process.argv[2] === '-p' || process.argv[2] === 'plugins_path'){
   console.log(global.PLUGINS_DIR);
 } else if(process.argv[2] === '-v' || process.argv[2] === 'version'){
   console.log(package_info.version);
-} else if(process.argv[2] === '-h' || process.argv[2] === 'help'){
-  console.log('help!!!');
+} else if(process.argv[2] === '-m' || process.argv[2] === 'man'){
+  console.log('there will be a manual here');
+} else if(process.argv.length < 3 || process.argv[2] === '-h' || process.argv[2] === 'help'){
+  console.log(help_message.toString().replace(/function.*\{\/\*([\s\S]+)\*\/\}$/ig, "$1"));
 } else {
-
     daemon.lookup(
       'start',
       function(){
@@ -82,7 +104,6 @@ function install_plugin(type, link, postinstall){
     } else {
       clone_repo(link, target_dir, function(){
         logger(link + ' installed', 'plugin');
-        //cmus_remote.stdin.write('echo ' + type + ' ' + link + ' installed\n');
         if(postinstall.length > 0){
           daemon.run_plugin(
             postinstall,

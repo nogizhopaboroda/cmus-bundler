@@ -21,11 +21,7 @@ cmus-bundler -V
 ```
 should print current version
 
-2) Make sure that `~/.cmus` directory exists
-
-3) Create `rc` file inside `~/.cmus` directory if it doesn't exist
-
-4) Confugure bundles in `rc` file
+1) Confugure bundles in `rc` file
 
 
 Configuring bundles
