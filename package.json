@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "cmus player plugin manager",
   "main": "bundler.js",
+  "readme": "README.md",
   "bin": {
     "cmus-bundler": "./bundler.js"
   },
@@ -12,7 +13,7 @@
     "optimist": "^0.6.1"
   },
   "devDependencies": {},
-  "scripts": {},
+  "scripts": { "postinstall" : "scripts/install.js" },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/nogizhopaboroda/cmus-bundler.git"
