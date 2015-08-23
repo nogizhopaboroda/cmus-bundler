@@ -229,18 +229,28 @@ $ cmus-bundler get
 
 ##### Themes
 https://github.com/JustinPatricWade/cmus-theme_solar-mild
+
 https://github.com/alextercete/cmus-theme-screenshot
+
 https://github.com/prakhar1989/Gems
 
 ##### Plugins
 https://github.com/jplitza/cmus-fullscreen
+
 https://github.com/hakerdefo/cmus-lyrics
+
 https://github.com/kiike/cmus-remote
+
 https://github.com/equinox1993/CMUS-Lyrics-Plugin
+
 https://github.com/tqmz/playlister
+
 https://github.com/brendanwhitfield/itunes-to-cmus
+
 https://github.com/jwohlert/raspberry-music
+
 https://github.com/bilee/juke-x1
+
 
 ## Bugs/Issues
 Please report [here](https://github.com/nogizhopaboroda/cmus-bundler/issues)
