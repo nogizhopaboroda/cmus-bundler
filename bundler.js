@@ -15,6 +15,7 @@ function help_message(){/*
 
     $ cmus-bundler -i
     $ $(cmus-bundler -p)/plugin_foo/binary_file
+    $ cmus-bundler man | less
 
   For more information read the manual:
     $ cmus-bundler man
@@ -27,6 +28,7 @@ var fs = require('fs');
 var logger = require('./logger')();
 var Client = require('./socket').Client;
 var daemon = require('./daemon');
+var rmd = require('rmd');
 
 global.HOME_DIR = process.env.HOME || process.env.USERPROFILE;
 global.CMUS_DIR = HOME_DIR + '/.cmus';
@@ -50,7 +52,12 @@ if(process.argv[2] === 'start'){
 } else if(process.argv[2] === '-v' || process.argv[2] === 'version'){
   console.log(package_info.version);
 } else if(process.argv[2] === '-m' || process.argv[2] === 'man'){
-  console.log('there will be a manual here');
+  var options = {
+    file: __dirname + "/README.md",
+  };
+  rmd.run(options, function(output) {
+    console.log(output);
+  });
 } else if(process.argv.length < 3 || process.argv[2] === '-h' || process.argv[2] === 'help'){
   console.log(help_message.toString().replace(/function.*\{\/\*([\s\S]+)\*\/\}$/ig, "$1"));
 } else {
