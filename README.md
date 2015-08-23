@@ -73,7 +73,7 @@ shell cmus-bundler start [debug [debug_events]]
 # shell cmus-bundler start debug info plugin status_program
 ```
 
-**set:** sets runtime variable. all variables pass to status programs as environment variables.
+**set:** sets runtime variable. **_all variables pass to status programs as environment variables_**.
 ```vim
 shell cmus-bundler set <key> <value>
 
@@ -98,7 +98,7 @@ shell cmus-bundler plugin <user>/<repository_name> [install_command]
 # shell cmus-bundler plugin someauthor/someplugin install_script.sh
 ```
 
-**theme:** installs theme to `~/.cmus/themes`.
+**theme:** installs theme to `~/.cmus/themes`. everything else the same as for **plugin**
 ```vim
 shell cmus-bundler theme <user>/<repository_name> [install_command]
 ```
@@ -107,9 +107,12 @@ shell cmus-bundler theme <user>/<repository_name> [install_command]
 ```vim
 shell cmus-bundler status_program <repository_name>/<status_program_binary>
 
+#or
+# shell cmus-bundler status_program cmd <shell_command>
+
 # set status_display_program=cmus-bundler
 # required in this case
-# 
+#
 # examples:
 # shell cmus-bundler status_program someplugin/status_program.sh
 # shell cmus-bundler status_program cmd "node someplugin/script.js"
@@ -119,6 +122,9 @@ shell cmus-bundler status_program <repository_name>/<status_program_binary>
 **call:** calls plugin or executes shell command in `~/.cmus/plugins` directory.
 ```vim
 shell cmus-bundler call <repository_name>/<status_program_binary>
+
+# or
+# shell cmus-bundler call cmd <shell_command>
 
 # examples:
 # shell cmus-bundler call someplugin/some_app.py
@@ -145,11 +151,11 @@ shell cmus-bundler start debug >> ~/logs/cmus.txt
 # serve logs directory
 shell cmus-bundler call cmd "cd ~/logs && python -m SimpleHTTPServer 8081"
 
-# install remote app plugin
+# install remote app plugin and it's dependencies
 shell cmus-bundler plugin nogizhopaboroda/cmus_app cmd "pip install --user bottle sh"
 
 # run remote app plugin
-shell cmus-bundler call cmd "python cmus_app/app.py --noconfig --port 8080
+shell cmus-bundler call cmd "python cmus_app/app.py --noconfig --port 8080"
 ```
 
 ```shell
