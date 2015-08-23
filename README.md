@@ -3,6 +3,7 @@
 Plugin manager for [C* Music Player](https://github.com/cmus/cmus)
 
 
+  * [Overview](#overview)
   * [Dependencies](#dependencies)
   * [Installation](#installation)
   * [Configuring rc file](#configuring-cmus-rc-file)
@@ -13,6 +14,15 @@ Plugin manager for [C* Music Player](https://github.com/cmus/cmus)
   * [Bugs/Issues](#bugsissues)
 
 
+## Overview
+
+If you are familiar with vim and vim plugin managers, next 2 lines are enough to explain what cmus-bundler is.
+
+[cmus](https://github.com/cmus/cmus) is awesome crossplatform cli player. it supports plugins and colorschemes like `vim` does.
+
+`cmus-bundler` is plugins manager for cmus. like vim plugin managers are.
+
+It works as a daemon with its own state and communicates with `cmus` via `cmus-remote` program. That's why `cmus-bundler start` command is required in order to start daemon when cmus starts.
 
 ## Dependencies
 
@@ -37,20 +47,25 @@ Usage: cmus-bundler [option]
 
 ## Configuring cmus `rc` file
 
-Each command runs by:
-```rc
+Run daemon:
+```vim
+shell cmus-bundler start
+```
+
+To communicate with bundler daemon use cmus built-in command `shell`. In the `rc` file it'll look like:
+```vim
 shell cmus-bundler <command>
 ```
-Set status display program:
+
+Set `cmus-bundler` as a status_display_program (optional):
 ```vim
 set status_display_program=cmus-bundler
 ```
 
 #### Available options
 
+**start:** starts bundler daemon. required command.
 ```vim
-## start ##               #required command
-
 shell cmus-bundler start [debug [debug_events]]
 
 # examples:
@@ -58,9 +73,8 @@ shell cmus-bundler start [debug [debug_events]]
 # shell cmus-bundler start debug info plugin status_program
 ```
 
+**set:** sets runtime variable. all variables pass to status programs as environment variables.
 ```vim
-## set ##
-
 shell cmus-bundler set <key> <value>
 
 # examples:
@@ -68,9 +82,8 @@ shell cmus-bundler set <key> <value>
 # shell cmus-bundler set LASTFM_PASSWORD my_password
 ```
 
+**plugin:** installs plugin to `~/.cmus/plugins`.
 ```vim
-## plugin ##
-
 shell cmus-bundler plugin <user>/<repository_name> [install_command]
 
 # install_command:
@@ -85,26 +98,26 @@ shell cmus-bundler plugin <user>/<repository_name> [install_command]
 # shell cmus-bundler plugin someauthor/someplugin install_script.sh
 ```
 
+**theme:** installs theme to `~/.cmus/themes`.
 ```vim
-## theme ##
-
 shell cmus-bundler theme <user>/<repository_name> [install_command]
 ```
 
+**status_program:** sets status program. in this case bundler works as a proxy between cmus and status program and passes environment variables from **set** option.
 ```vim
-## status_program ##
-
 shell cmus-bundler status_program <repository_name>/<status_program_binary>
 
+# set status_display_program=cmus-bundler
+# required in this case
+# 
 # examples:
 # shell cmus-bundler status_program someplugin/status_program.sh
 # shell cmus-bundler status_program cmd "node someplugin/script.js"
 # shell cmus-bundler status_program cmd "echo $@ >> ~/status.txt"
 ```
 
+**call:** calls plugin or executes shell command in `~/.cmus/plugins` directory.
 ```vim
-## call ##
-
 shell cmus-bundler call <repository_name>/<status_program_binary>
 
 # examples:
@@ -145,11 +158,9 @@ $ cmus
 ```
 
 Log:
-
 http://localhost:8081/cmus.txt
 
 Web interface:
-
 http://localhost:8080/
 
 
@@ -183,9 +194,11 @@ $ $(cmus-bundler -p)/cmus-cover-art/display.sh
 
 ## Debug
 
-- To debug plugins or cmus-bundler itself, pipe bundler's output into file and open this file via tail command
+***
+To debug plugins or cmus-bundler itself, pipe bundler's output into file and open this file via tail command
+***
 
-1) In `rc` file
+In `rc` file
 ```vim
 shell cmus-bundler start debug >> <path_to_log_file>
 ```
@@ -204,7 +217,10 @@ in another terminal tab run tail:
 $ tail -f <path_to_log_file>
 ```
 
-- To get current state of cmus-bundler daemon:
+***
+To get current state of cmus-bundler daemon:
+***
+
 ```shell
 $ cmus-bundler get
 ```
