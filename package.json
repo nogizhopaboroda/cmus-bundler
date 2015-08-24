@@ -1,6 +1,6 @@
 {
   "name": "cmus-bundler",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "cmus player plugin manager",
   "main": "bundler.js",
   "readme": "README.md",
