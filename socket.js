@@ -1,9 +1,11 @@
 var net = require('net');
 var fs = require('fs');
 
-var SOCKET_PATH = __dirname + '/socket.sock';
+var HOME_DIR = process.env.HOME || process.env.USERPROFILE;
+var CMUS_DIR = HOME_DIR + '/.cmus';
+var SOCKET_PATH = CMUS_DIR + '/bundler_socket.sock';
 var MAX_RECONNECTS = 3;
-var RECONNECT_TOMEOUT = 100;
+var RECONNECT_TIMEOUT = 300;
 
 function delete_socket(cbk){
   fs.unlink(SOCKET_PATH, function(){
@@ -54,7 +56,7 @@ module.exports = {
             q.on_reconnect && q.on_reconnect(current_turn);
             setTimeout(function(){
               self.run(current_turn + 1);
-            }, RECONNECT_TOMEOUT);
+            }, RECONNECT_TIMEOUT);
           }
         });
         client.on('timeout', function() { });

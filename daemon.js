@@ -153,7 +153,7 @@ function lookup_self(command, ifyes_callback, ifno_callback){
         bundler_path = stdout.replace('\n', '');
       }
       process.nextTick(function(){
-        exec_async('pgrep -f "node ' + bundler_path + ' ' + command + '"', function(error, stdout, stderr){
+        exec_async('pgrep -f "^node ' + bundler_path + ' ' + command + '"', function(error, stdout, stderr){
           if (error !== null) {
             ifno_callback();
           } else {

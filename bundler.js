@@ -21,6 +21,15 @@ function help_message(){/*
     $ cmus-bundler man
 */};
 
+global.HOME_DIR = process.env.HOME || process.env.USERPROFILE;
+global.CMUS_DIR = HOME_DIR + '/.cmus';
+global.THEMES_DIR = CMUS_DIR + '/themes';
+global.PLUGINS_DIR = CMUS_DIR + '/plugins';
+global.DIRS = {
+  'plugin': PLUGINS_DIR,
+  'theme': THEMES_DIR,
+};
+
 
 var package_info = require('./package.json');
 var exec_async = require('child_process').exec;
@@ -30,14 +39,6 @@ var Client = require('./socket').Client;
 var daemon = require('./daemon');
 var rmd = require('rmd');
 
-global.HOME_DIR = process.env.HOME || process.env.USERPROFILE;
-global.CMUS_DIR = HOME_DIR + '/.cmus';
-global.THEMES_DIR = CMUS_DIR + '/themes';
-global.PLUGINS_DIR = CMUS_DIR + '/plugins';
-global.DIRS = {
-  'plugin': PLUGINS_DIR,
-  'theme': THEMES_DIR,
-};
 
 
 if(process.argv[2] === 'start'){
