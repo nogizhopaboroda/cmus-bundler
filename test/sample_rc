@@ -1,0 +1,15 @@
+# start and write logs
+shell /cmus_bundler/bundler.js start debug >> /home/vagrant/logs/cmus.txt
+
+# serve logs directory
+shell /cmus_bundler/bundler.js call cmd "cd /home/vagrant/logs && python -m SimpleHTTPServer 8081"
+
+# install remote app plugin and it's dependencies
+shell /cmus_bundler/bundler.js plugin nogizhopaboroda/cmus_app cmd "pip install --user bottle sh"
+
+# run remote app plugin
+shell /cmus_bundler/bundler.js call cmd "python cmus_app/app.py --noconfig --port 8080"
+
+echo ok
+
+set status_display_program=/cmus_bundler/bundler.js

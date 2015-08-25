@@ -1,0 +1,35 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  config.vm.box = "puphpet/ubuntu1404-x64"
+
+  config.vm.synced_folder "../", "/cmus_bundler", :nfs => true  
+
+  config.vm.network "private_network", ip: "192.168.100.200"
+
+   config.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y python-pip
+
+     sudo apt-get install -y cmus nodejs npm git 
+
+     # fix nodejs->node linux issue
+     sudo ln -s /usr/bin/nodejs /usr/bin/node
+
+     # install cmus-bundler
+     # sudo npm install -g cmus-bundler
+
+     # make audio work
+     sudo usermod -a -G audio `whoami`
+
+     # create logs directory
+     sudo mkdir /home/vagrant/logs
+
+     # copy sample rc file
+     sudo cp /cmus_bundler/test/sample_rc /home/vagrant/.cmus/rc
+   SHELL
+end
+
+#
