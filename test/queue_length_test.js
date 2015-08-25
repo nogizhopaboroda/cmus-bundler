@@ -1,4 +1,4 @@
-var Client = require("./socket").Client;
+var Client = require("../socket").Client;
 var spawn = require("child_process").spawn;
 var colors = require("colors/safe");
 var argv = require("optimist")
