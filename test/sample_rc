@@ -10,6 +10,6 @@ shell /cmus_bundler/bundler.js plugin nogizhopaboroda/cmus_app cmd "pip install 
 # run remote app plugin
 shell /cmus_bundler/bundler.js call cmd "python cmus_app/app.py --noconfig --port 8080"
 
-echo ok
-
 set status_display_program=/cmus_bundler/bundler.js
+
+echo ok

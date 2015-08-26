@@ -11,9 +11,13 @@ Vagrant.configure(2) do |config|
 
    config.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
-     sudo apt-get install -y python-pip
+     sudo apt-get install -y python-pip git
 
-     sudo apt-get install -y cmus nodejs npm git 
+     # install cmus
+     sudo apt-get install -y cmus
+
+     # install node + npm
+     sudo apt-get install -y nodejs npm
 
      # fix nodejs->node linux issue
      sudo ln -s /usr/bin/nodejs /usr/bin/node
@@ -22,13 +26,17 @@ Vagrant.configure(2) do |config|
      # sudo npm install -g cmus-bundler
 
      # make audio work
-     sudo usermod -a -G audio `whoami`
+     sudo usermod -a -G audio vagrant
 
      # create logs directory
-     sudo mkdir /home/vagrant/logs
+     mkdir /home/vagrant/logs
 
-     # copy sample rc file
-     sudo cp /cmus_bundler/test/sample_rc /home/vagrant/.cmus/rc
+     # create cmus directory
+     mkdir /home/vagrant/.cmus
+
+     # create cmus rc file
+     echo "source /cmus_bundler/test/sample_rc" > /home/vagrant/.cmus/rc
+
    SHELL
 end
 
