@@ -34,6 +34,12 @@ Vagrant.configure(2) do |config|
      # create cmus directory
      mkdir /home/vagrant/.cmus
 
+     # create music directory
+     mkdir /home/vagrant/music
+
+     # download test mp3 file
+     curl -o /home/vagrant/music/test.mp3 http://lcweb4.loc.gov/afc/afcreed/130/13033b03.mp3
+
      # create cmus rc file
      echo "source /cmus_bundler/test/sample_rc" > /home/vagrant/.cmus/rc
 
