@@ -92,7 +92,7 @@ function send_message(message){
 
 function clone_repo(link, target_dir, cbk){
   logger(link + " -> " + target_dir, "plugin");
-  daemon.run_plugin(["cmd", "git clone git@github.com:" + link + ".git " + target_dir], {}, function(){
+  daemon.run_plugin(["cmd", "git clone  https://github.com/" + link + ".git " + target_dir], {}, function(){
     cbk && cbk();
   });
 }

@@ -43,7 +43,17 @@ function init(){
 
   cmus_remote.on("close", function (code) {
     logger("child process exited with code " + code, "info");
-    process.exit(0);
+
+    //copypaste!
+    children.forEach(function(child){
+      child.kill();
+    });
+
+    delete_socket(function(){
+      logger("deleting socket", "info");
+      process.exit(0);
+    });
+
   });
 
   setInterval(function(){
@@ -138,7 +148,6 @@ function run_plugin(cmd_array, options, success_callback, error_callback){
         success_callback && success_callback(stdout);
       }
     });
-    return child_process;
   }
 
   children.push(child_process);
