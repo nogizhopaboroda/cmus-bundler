@@ -3,47 +3,76 @@
 
 Vagrant.configure(2) do |config|
 
+  config.ssh.forward_x11 = true
+
   config.vm.box = "puphpet/ubuntu1404-x64"
 
   config.vm.synced_folder "../", "/cmus_bundler", :nfs => true  
 
   config.vm.network "private_network", ip: "192.168.100.200"
 
-   config.vm.provision "shell", inline: <<-SHELL
-     sudo apt-get update
-     sudo apt-get install -y python-pip git
+  # enable audio drivers on VM settings
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, '--audio', 'coreaudio', '--audiocontroller', 'hda'] # choices: hda sb16 ac97
+  end
 
-     # install cmus
-     sudo apt-get install -y cmus
+  config.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y python-pip git
 
-     # install node + npm
-     sudo apt-get install -y nodejs npm
+      # install cmus
+      sudo apt-get install -y cmus
 
-     # fix nodejs->node linux issue
-     sudo ln -s /usr/bin/nodejs /usr/bin/node
+      # install node + npm
+      sudo apt-get install -y nodejs npm
 
-     # install cmus-bundler
-     # sudo npm install -g cmus-bundler
+      # fix nodejs->node linux issue
+      sudo ln -s /usr/bin/nodejs /usr/bin/node
 
-     # make audio work
-     sudo usermod -a -G audio vagrant
+      # install cmus-bundler
+      # sudo npm install -g cmus-bundler
 
-     # create logs directory
-     mkdir /home/vagrant/logs
+      # make audio work
+      sudo usermod -a -G audio vagrant
 
-     # create cmus directory
-     mkdir /home/vagrant/.cmus
+      # create logs directory
+      sudo mkdir /home/vagrant/logs
+      sudo chmod -R 0777 /home/vagrant/logs
 
-     # create music directory
-     mkdir /home/vagrant/music
+      # create cmus directory
+      sudo mkdir /home/vagrant/.cmus
+      sudo chmod -R 0777 /home/vagrant/.cmus
 
-     # download test mp3 file
-     curl -o /home/vagrant/music/test.mp3 http://lcweb4.loc.gov/afc/afcreed/130/13033b03.mp3
+      # create cmus rc file
+      sudo echo "source /cmus_bundler/test/sample_rc" > /home/vagrant/.cmus/rc
 
-     # create cmus rc file
-     echo "source /cmus_bundler/test/sample_rc" > /home/vagrant/.cmus/rc
+      # create music directory
+      sudo mkdir /home/vagrant/music
+      sudo chmod -R 0777 /home/vagrant/music
 
-   SHELL
+      # download test mp3 file
+      sudo curl -o /home/vagrant/music/test.mp3 http://lcweb4.loc.gov/afc/afcreed/130/13033b03.mp3
+
+
+
+      # Other settings
+      export DEBIAN_FRONTEND=noninteractive
+
+      # ---- OSS AUDIO
+      sudo apt-get install -y oss4-base oss4-dkms oss4-source oss4-gtk linux-headers-3.2.0-23 debconf-utils module-assistant
+      sudo ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/source || echo ALREADY SYMLINKED
+      sudo module-assistant prepare
+      sudo module-assistant auto-install -i oss4 # this can take 2 minutes
+      sudo debconf-set-selections <<< "linux-sound-base linux-sound-base/sound_system select  OSS"
+      echo READY.
+      # have to reboot for drivers to kick in, but only the first time of course
+      if [ ! -f ~/runonce ]
+      then
+        sudo reboot
+        touch ~/runonce
+      fi
+
+  SHELL
 end
 
 #
