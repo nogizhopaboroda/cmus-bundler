@@ -7,7 +7,7 @@ function help_message(){/*
 
     -h, help            output usage information
     -v, version         output the version number
-    -i, install         install all plugins and themes
+    -i, install         install all plugins and themes declared in rc file
     -p, plugins_path    print plugins path
     -m, man             print manual
 

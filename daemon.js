@@ -20,6 +20,13 @@ var state = {
 
   
 function init(){
+
+  process.on('exit', function(){
+    children.forEach(function(child){
+      process.kill(-child.pid);
+    });
+  })
+
   var cmus_remote = spawn("cmus-remote", []);
 
   cmus_remote.stdout.on("data", function (data) {
@@ -131,12 +138,14 @@ function on_message(message, cb){
 
 function run_plugin(cmd_array, options, success_callback, error_callback){
   if(cmd_array[0] === "cmd"){
-    var child_process = exec_async(cmd_array.slice(1).join(" "), options, function(error, stdout, stderr){
-      if (error !== null && error_callback) {
-        error_callback(error.stack);
-      } else {
-        success_callback && success_callback(stdout);
-      }
+    options.detached = true;
+    var child_process = spawn('/bin/sh', ['-c'].concat(cmd_array.slice(1)), options);
+    child_process.stdout.on('data', function (data) {});
+
+    child_process.stderr.on('data', function (data) {});
+
+    child_process.on('close', function (code) {
+      success_callback && success_callback();
     });
   } else {
     var script_name = PLUGINS_DIR + "/" + cmd_array[0];
