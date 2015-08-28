@@ -130,7 +130,7 @@ shell cmus-bundler call <repository_name>/<status_program_binary>
 ```
 
 ## Preinstall bundles
-In order to be sure all plugins have been installed when you run cmus, you can install all plugins/themes described in `rc` file:
+In order to be sure all plugins have been installed when you run cmus, recommended to preinstall all plugins/themes described in `rc` file once new plugins added:
 
 ```shell
 $ cmus-bundler install
@@ -153,7 +153,7 @@ shell cmus-bundler call cmd "cd ~/logs && python -m SimpleHTTPServer 8081"
 shell cmus-bundler plugin nogizhopaboroda/cmus_app cmd "pip install --user bottle sh"
 
 # run remote app plugin
-shell cmus-bundler call cmd "python cmus_app/app.py --noconfig --port 8080"
+shell cmus-bundler call cmd "cd cmus_app && python app.py --noconfig --port 8080 --app-host localhost"
 ```
 
 ```shell
@@ -169,7 +169,7 @@ http://localhost:8080/
 
 
 
-#### Setting up cmus for everyday usage
+#### Setting up cmus for everyday usage (tested on OS X)
 ```vim
 # start bundler
 shell cmus-bundler start
@@ -178,7 +178,7 @@ shell cmus-bundler start
 shell cmus-bundler theme alextercete/cmus-theme-screenshot
 colorscheme themes/cmus-theme-screenshot/screenshot
 
-# install cover-art plugin
+# install cover-art plugin (iterm2 only)
 shell cmus-bundler plugin nogizhopaboroda/cmus-cover-art cmd "sh install.sh"
 shell cmus-bundler status_program cmus-cover-art/observe.sh
 
