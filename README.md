@@ -16,13 +16,11 @@ Plugin manager for [C* Music Player](https://github.com/cmus/cmus)
 
 ## Overview
 
-If you are familiar with vim and vim plugin managers, next 2 lines are enough to explain what cmus-bundler is.
-
 [cmus](https://github.com/cmus/cmus) is awesome crossplatform cli player. it supports plugins and colorschemes like `vim` does.
 
 `cmus-bundler` is plugins manager for cmus. like vim plugin managers are.
 
-It works as a daemon with its own state and communicates with `cmus` via `cmus-remote` program. That's why `cmus-bundler start` command is required in order to start daemon when cmus starts.
+It works as a daemon with its own state and communicates with `cmus` via `cmus-remote` program.
 
 ## Dependencies
 
@@ -47,14 +45,14 @@ Usage: cmus-bundler [option]
 
 ## Configuring cmus `rc` file
 
-Run daemon:
-```vim
-shell cmus-bundler start
-```
-
 To communicate with bundler daemon use cmus built-in command `shell`. In the `rc` file it'll look like:
 ```vim
 shell cmus-bundler <command>
+```
+
+Run daemon:
+```vim
+shell cmus-bundler start
 ```
 
 Set `cmus-bundler` as a status_display_program (optional):
@@ -64,7 +62,7 @@ set status_display_program=cmus-bundler
 
 #### Available options
 
-**start:** starts bundler daemon. required command.
+**start:** starts bundler daemon. **required command**.
 ```vim
 shell cmus-bundler start [debug [debug_events]]
 
@@ -184,6 +182,10 @@ colorscheme themes/cmus-theme-screenshot/screenshot
 shell cmus-bundler plugin nogizhopaboroda/cmus-cover-art cmd "sh install.sh"
 shell cmus-bundler status_program cmus-cover-art/observe.sh
 
+# control cmus via gloabl media keys
+shell cmus-bundler plugin nogizhopaboroda/cmus-mediakeys cmd "npm install"
+shell cmus-bundler call cmus-mediakeys/mediakeys
+
 # set cmus-bundler as status program
 set status_display_program=cmus-bundler
 ```
@@ -256,6 +258,10 @@ https://github.com/brendanwhitfield/itunes-to-cmus
 https://github.com/jwohlert/raspberry-music
 
 https://github.com/bilee/juke-x1
+
+https://github.com/nogizhopaboroda/cmus_app
+
+https://github.com/nogizhopaboroda/cmus-cover-art
 
 
 ## Bugs/Issues
