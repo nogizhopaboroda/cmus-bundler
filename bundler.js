@@ -19,6 +19,7 @@ function help_message(){/*
 
   For more information read the manual:
     $ cmus-bundler man
+  or go to the project page: https://github.com/nogizhopaboroda/cmus-bundler
 */};
 
 global.HOME_DIR = process.env.HOME || process.env.USERPROFILE;
@@ -37,6 +38,7 @@ var fs = require("fs");
 var logger = require("./logger")();
 var Client = require("./socket").Client;
 var daemon = require("./daemon");
+var installer = require("./installer");
 var rmd = require("rmd");
 
 
@@ -44,7 +46,7 @@ var rmd = require("rmd");
 if(process.argv[2] === "start"){
   daemon.init();
 } else if(process.argv[2] === "-i" || process.argv[2] === "install"){
-  daemon.install();
+  installer.install();
 } else if(process.argv[2] === "plugin" || process.argv[2] === "theme"){
   var message = process.argv.slice(2);
   install_plugin(message[0], message[1], message.slice(2));

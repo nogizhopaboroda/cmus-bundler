@@ -163,64 +163,25 @@ function run_plugin(cmd_array, options, success_callback, error_callback){
 }
 
 function lookup_self(command, ifyes_callback, ifno_callback){
-    exec_async("which cmus-bundler", function(error, stdout, stderr){
-      var bundler_path;
-      if (error !== null) {
-        bundler_path = module.parent.filename;
-      } else {
-        bundler_path = stdout.replace("\n", "");
-      }
-      process.nextTick(function(){
-        exec_async("pgrep -f \"^node " + bundler_path + " " + command + "\"", function(error, stdout, stderr){
-          if (error !== null) {
-            ifno_callback();
-          } else {
-            ifyes_callback();
-          }
-        });
+  exec_async("which cmus-bundler", function(error, stdout, stderr){
+    var bundler_path;
+    if (error !== null) {
+      bundler_path = module.parent.filename;
+    } else {
+      bundler_path = stdout.replace("\n", "");
+    }
+    process.nextTick(function(){
+      exec_async("pgrep -f \"^node " + bundler_path + " " + command + "\"", function(error, stdout, stderr){
+        if (error !== null) {
+          ifno_callback();
+        } else {
+          ifyes_callback();
+        }
       });
     });
+  });
 }
 
-
-function install(){
-
-  var cmus = spawn("cmus", []);
-
-  cmus.stdout.on("data", function (data) { cmus.kill(); }); 
-  cmus.stderr.on("data", function (data) { cmus.kill(); });
-  cmus.on("close", function (code) {});
-
-  var install_queue = {};
-  process.stdout.write("waiting...\n");
-  Server()
-    .then(function(message, cb){
-      if(message[0] === "theme" || message[0] === "plugin"){
-        if(message[2] === "ok"){
-          setTimeout(function(){
-            install_queue[message[1]] = true;
-            process.stdout.write(message[1] + colors.green(" installed\n"));
-
-            var need_exit = true;
-            for(var key in install_queue){
-              if(install_queue[key] === false){
-                need_exit = false;
-                break;
-              }
-            }
-            need_exit && process.exit(0);
-
-            cb("ok");
-          }, 100);
-        } else {
-          install_queue[message[1]] = false;
-          process.stdout.write("installing "+ message[1] + " ...\n");
-          cb("ok");
-        }
-      }
-    })
-    .run()
-}
 
 
 module.exports = {
@@ -234,7 +195,6 @@ module.exports = {
       init
     )
   },
-  install: install,
   lookup: lookup_self
 }
 
