@@ -27,7 +27,7 @@
     "music"
   ],
   "author": "Alexander Zhukov",
-  "license": "",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/nogizhopaboroda/cmus-bundler/issues"
   },
