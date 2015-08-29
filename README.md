@@ -271,6 +271,8 @@ https://github.com/weisslj/cmus_lastfm_autoadd
 
 https://github.com/TiredSounds/cmus-conky
 
+https://github.com/cmus-plugins/cmus-base-plugins
+
 
 ## Bugs/Issues
 Please report [here](https://github.com/nogizhopaboroda/cmus-bundler/issues)
