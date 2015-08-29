@@ -263,6 +263,14 @@ https://github.com/nogizhopaboroda/cmus_app
 
 https://github.com/nogizhopaboroda/cmus-cover-art
 
+https://github.com/freshprince/cmuscrobbler
+
+https://github.com/Arkq/cmusfm
+
+https://github.com/weisslj/cmus_lastfm_autoadd
+
+https://github.com/TiredSounds/cmus-conky
+
 
 ## Bugs/Issues
 Please report [here](https://github.com/nogizhopaboroda/cmus-bundler/issues)
