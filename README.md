@@ -2,7 +2,7 @@
 
 Plugin manager for [C* Music Player](https://github.com/cmus/cmus)
 
-
+  * [Demo](#demo)
   * [Overview](#overview)
   * [Dependencies](#dependencies)
   * [Installation](#installation)
@@ -31,6 +31,7 @@ alt="demo" width="560" height="315" border="10" /></a>
   * cmus
   * nodejs
   * npm
+  * git
 
 ## Installation
 
@@ -54,7 +55,7 @@ To communicate with bundler daemon use cmus built-in command `shell`. In the `rc
 shell cmus-bundler <command>
 ```
 
-Run daemon:
+Run daemon (required):
 ```vim
 shell cmus-bundler start
 ```
