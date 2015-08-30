@@ -13,6 +13,11 @@ Plugin manager for [C* Music Player](https://github.com/cmus/cmus)
   * [Known plugins](#known-plugins)
   * [Bugs/Issues](#bugsissues)
 
+## Demo
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=nfspVtg_Hv8
+" target="_blank"><img src="http://img.youtube.com/vi/nfspVtg_Hv8/0.jpg" 
+alt="demo" width="560" height="315" border="10" /></a>
 
 ## Overview
 
@@ -20,7 +25,6 @@ Plugin manager for [C* Music Player](https://github.com/cmus/cmus)
 
 `cmus-bundler` is plugins manager for cmus. like vim plugin managers are.
 
-It works as a daemon with its own state and communicates with `cmus` via `cmus-remote` program.
 
 ## Dependencies
 
