@@ -124,7 +124,7 @@ shell cmus-bundler status_program <repository_name>/<status_program_binary>
 
 **call:** calls plugin or executes shell command in `~/.cmus/plugins` directory.
 ```vim
-shell cmus-bundler call <repository_name>/<status_program_binary>
+shell cmus-bundler call <repository_name>/<plugin_binary>
 
 # or
 # shell cmus-bundler call cmd <shell_command>
