@@ -145,7 +145,7 @@ $ cmus-bundler install
 
 Here are a couple of example `rc` files for different cases
 
-#### Setting up cmus as a music server
+#### Setting up cmus as a music server (jukebox)
 
 ```vim
 # start and write logs
